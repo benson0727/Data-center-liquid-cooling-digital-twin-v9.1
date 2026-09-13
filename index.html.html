@@ -1,0 +1,3801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OCP Project Deschutes · Specification-Anchored Digital Twin · v9.1 (September 2026)</title>
+<!--
+  OCP Project Deschutes · Specification-Anchored Digital Twin
+  Research prototype. Release v9.1 — September 2026 (post-audit, defence-hardening build).
+  Release identifiers in this file are dated, not sequential feature versions:
+  v9.1 denotes the September 2026 defence-hardening release. Corrections arising from the
+  clause-level audit are documented in the thesis manuscript, Table 4.5, and
+  are anchored in this file by function name rather than by line number.
+-->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap');
+
+  :root {
+    --red: #E2001A;
+    --dark: #0F0F0F;
+    --mid: #1C1C1C;
+    --card: #242424;
+    --border: #333;
+    --text: #F0F0F0;
+    --muted: #888;
+    --accent: #FF4444;
+    --green: #00C87A;
+    --blue: #0099FF;
+    --yellow: #FFB800;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--mid);
+    border-bottom: 3px solid var(--red);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-mark {
+    height: 42px;
+    width: auto;
+    display: block;
+    margin-right: 4px;
+  }
+
+  .logo-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  /* LANG TOGGLE */
+  .lang-toggle {
+    display: flex;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .lang-btn {
+    padding: 6px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+
+  .lang-btn.active {
+    background: var(--red);
+    color: white;
+  }
+
+  /* MAIN LAYOUT */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, var(--mid) 0%, #1a0a0a 100%);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--red);
+    padding: 28px 32px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 32px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    line-height: 1.1;
+  }
+
+  .hero h1 span { color: var(--red); }
+
+  .hero p {
+    color: var(--muted);
+    margin-top: 8px;
+    font-size: 14px;
+    max-width: 600px;
+    line-height: 1.6;
+  }
+
+  /* SECTION TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+  }
+
+  .tab-btn {
+    padding: 10px 20px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+  }
+
+  .tab-btn.active {
+    color: var(--red);
+    border-bottom-color: var(--red);
+  }
+
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  /* TAB PANELS */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* GRID */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 768px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  /* CARD */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+  }
+
+  .card-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title .icon { font-size: 18px; }
+
+  /* FORM */
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  input[type="number"], select {
+    width: 100%;
+    background: var(--mid);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    border-radius: 3px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="number"]:focus, select:focus {
+    border-color: var(--red);
+  }
+
+  .unit-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* BUTTON */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--red);
+    color: white;
+    width: 100%;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  .btn-primary:hover { background: #c5001a; }
+
+  /* RESULTS */
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 768px) { .result-grid { grid-template-columns: 1fr 1fr; } }
+
+  .result-item {
+    background: var(--mid);
+    border: 1px solid var(--border);
+    padding: 16px;
+    border-radius: 3px;
+    text-align: center;
+  }
+
+  .result-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .result-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1;
+  }
+
+  .result-unit {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* PRODUCT TABLE */
+  .product-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .product-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    background: var(--mid);
+  }
+
+  .product-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .product-table tr:last-child td { border-bottom: none; }
+  .product-table tr:hover td { background: rgba(226,0,26,0.04); }
+
+  .prod-name {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  .prod-code {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    color: var(--blue);
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .tag-valve { background: rgba(0,153,255,0.15); color: var(--blue); }
+  .tag-sensor { background: rgba(0,200,122,0.15); color: var(--green); }
+  .tag-drive { background: rgba(255,184,0,0.15); color: var(--yellow); }
+  .tag-controller { background: rgba(226,0,26,0.15); color: var(--red); }
+  .tag-pump { background: rgba(180,100,255,0.15); color: #B464FF; }
+
+  .qty-badge {
+    display: inline-block;
+    background: var(--red);
+    color: white;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    min-width: 28px;
+    text-align: center;
+    padding: 2px 6px;
+    border-radius: 2px;
+  }
+
+  /* ALERT BOX */
+  .alert {
+    border-left: 3px solid var(--yellow);
+    background: rgba(255,184,0,0.08);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--yellow);
+    margin-bottom: 16px;
+    border-radius: 2px;
+  }
+
+  .alert.info { border-color: var(--blue); background: rgba(0,153,255,0.08); color: var(--blue); }
+  .alert.ok { border-color: var(--green); background: rgba(0,200,122,0.08); color: var(--green); }
+
+  /* FORMULA BOX */
+  .formula-box {
+    background: var(--mid);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    padding: 14px 18px;
+    border-radius: 3px;
+    margin-bottom: 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    color: var(--blue);
+  }
+
+  .formula-box span { color: var(--muted); font-size: 12px; font-family: 'Barlow', sans-serif; }
+
+  /* HIDDEN by LANG */
+  .en-text, .zh-text { }
+  body.lang-zh .en-text { display: none; }
+  body.lang-zh .zh-text { display: inline; }
+  body.lang-en .zh-text { display: none; }
+  body.lang-en .en-text { display: inline; }
+
+  .zh-text { display: none; }
+
+  /* SECTION DIVIDER */
+  .section-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 24px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* HIDDEN RESULTS */
+  #results-panel { display: none; }
+  #results-panel.visible { display: block; }
+
+  /* SPEC TABLE */
+  .spec-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .spec-row:last-child { border-bottom: none; }
+  .spec-key { color: var(--muted); }
+  .spec-val { font-weight: 600; color: var(--text); font-family: 'Barlow Condensed', sans-serif; font-size: 15px; }
+
+  /* SCROLL AREA */
+  .scroll-x { overflow-x: auto; }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 20px 32px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 48px;
+  }
+
+  .danfoss-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 4px 12px;
+    border-radius: 2px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--red);
+  }
+
+  /* BLINK DOT */
+  .blink-dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: blink 1.2s ease-in-out infinite;
+    vertical-align: middle;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  /* MONITOR GRID */
+  .monitor-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  @media(max-width:900px){ .monitor-grid { grid-template-columns: repeat(2,1fr); } }
+
+  /* ═══ Design note — two-tier sensor layout ═══
+     Tier 1: the 6 signals a CDU operator actually watches — large, always on.
+     Tier 2: the remaining §7.2.1 points, grouped by loop, collapsed by default. */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  @media(max-width:900px){ .kpi-grid { grid-template-columns: repeat(2,1fr); } }
+  @media(max-width:560px){ .kpi-grid { grid-template-columns: 1fr; } }
+
+  .kpi-grid .sensor-card { padding: 22px 20px; }
+  .kpi-grid .sensor-value { font-size: 52px; }
+  .kpi-grid .sensor-label { font-size: 12px; }
+  .kpi-grid .sensor-card::before { height: 4px; }
+  .kpi-spec {
+    font-size: 10px; letter-spacing: .5px; color: var(--muted);
+    margin-top: 8px; font-weight: 600;
+  }
+
+  .detail-toggle {
+    width: 100%; display: flex; align-items: center; justify-content: center;
+    gap: 10px; padding: 11px; margin-bottom: 18px; cursor: pointer;
+    background: transparent; border: 1.5px dashed var(--border);
+    border-radius: 4px; color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+    font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    transition: all .2s ease;
+  }
+  .detail-toggle:hover { border-color: var(--red); color: var(--red); }
+  .detail-toggle .chev { transition: transform .25s ease; }
+  .detail-toggle.open .chev { transform: rotate(180deg); }
+
+  #sensor-detail { display: none; }
+  #sensor-detail.open { display: block; }
+
+  .sensor-group-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 11px; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--muted);
+    margin: 18px 0 10px; display: flex; align-items: center; gap: 10px;
+  }
+  .sensor-group-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  #sensor-detail .sensor-value { font-size: 28px; }
+
+  .sensor-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 18px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .sensor-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .sensor-card.temp::before  { background: #FF6B35; }
+  .sensor-card.flow::before  { background: var(--blue); }
+  .sensor-card.press::before { background: var(--yellow); }
+  .sensor-card.power::before { background: var(--green); }
+
+  .sensor-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .sensor-id { color: var(--border); font-size: 10px; }
+
+  .sensor-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 36px; font-weight: 700; line-height: 1;
+    margin-bottom: 4px;
+  }
+  .sensor-unit { font-size: 13px; color: var(--muted); }
+
+  .sensor-bar {
+    height: 3px; background: var(--border); border-radius: 2px;
+    margin-top: 10px; overflow: hidden;
+  }
+  .sensor-bar-fill {
+    height: 100%; border-radius: 2px;
+    transition: width 1s ease;
+  }
+  .temp .sensor-bar-fill  { background: #FF6B35; }
+  .flow .sensor-bar-fill  { background: var(--blue); }
+  .press .sensor-bar-fill { background: var(--yellow); }
+  .power .sensor-bar-fill { background: var(--green); }
+
+  .status-ok    { color: var(--green); }
+  .status-warn  { color: var(--yellow); }
+  .status-alert { color: var(--accent); }
+
+  /* CHART AREA */
+  .chart-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .chart-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 14px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--red);
+    margin-bottom: 16px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .chart-live-badge {
+    font-size: 11px; font-weight: 600; letter-spacing: 1px;
+    color: var(--green); border: 1px solid var(--green);
+    padding: 2px 8px; border-radius: 2px;
+  }
+  canvas { display: block; width: 100% !important; }
+
+  /* DT ARCHITECTURE */
+  .dt-arch {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  @media(max-width:900px){ .dt-arch { grid-template-columns: 1fr; } }
+
+  .dt-layer {
+    padding: 18px 14px;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .dt-layer:last-child { border-right: none; }
+  .dt-layer-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+  }
+  .dt-layer-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px; font-weight: 700; margin-bottom: 10px;
+  }
+  .dt-layer ul {
+    list-style: none; padding: 0; margin: 0;
+    font-size: 12px; color: var(--muted); line-height: 1.9;
+  }
+  .dt-layer ul li::before { content: '— '; color: var(--border); }
+
+  .dt-layer.l1 .dt-layer-title { color: #FF6B35; }
+  .dt-layer.l2 .dt-layer-title { color: var(--blue); }
+  .dt-layer.l3 .dt-layer-title { color: var(--yellow); }
+  .dt-layer.l4 .dt-layer-title { color: #B464FF; }
+  .dt-layer.l5 .dt-layer-title { color: var(--green); }
+
+  .dt-arrow {
+    position: absolute; right: -10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted); font-size: 14px; z-index: 2;
+  }
+
+  /* EVENT LOG */
+  .event-log {
+    background: var(--mid);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    max-height: 160px;
+    overflow-y: auto;
+  }
+  .log-entry {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 5px 0; border-bottom: 1px solid var(--border);
+    animation: fadeIn 0.4s ease;
+  }
+  .log-entry:last-child { border-bottom: none; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; } }
+  .log-time { color: var(--muted); min-width: 60px; font-size: 12px; }
+  .log-ok   { color: var(--green); }
+  .log-warn { color: var(--yellow); }
+  .log-alert{ color: var(--accent); }
+
+  .grid-monitor-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media(max-width:768px){ .grid-monitor-bottom { grid-template-columns: 1fr; } }
+
+
+  /* ── TOOLTIP ── */
+  .field-wrap { position: relative; }
+
+  .tip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px; height: 16px;
+    background: var(--border);
+    color: var(--muted);
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 6px;
+    vertical-align: middle;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: background 0.2s;
+    font-style: normal;
+  }
+  .tip-icon:hover { background: var(--red); color: white; }
+
+  .tooltip-box {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: calc(100% + 6px);
+    z-index: 200;
+    background: #1a1a1a;
+    border: 1px solid var(--red);
+    border-left: 3px solid var(--red);
+    border-radius: 4px;
+    padding: 10px 14px;
+    width: 280px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    pointer-events: none;
+  }
+
+  .tooltip-box .tt-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: var(--red);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .tooltip-box .tt-body {
+    color: #ccc;
+    font-size: 12px;
+    line-height: 1.65;
+  }
+
+  .tooltip-box .tt-formula {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    color: var(--blue);
+    background: var(--mid);
+    padding: 4px 8px;
+    border-radius: 2px;
+    margin-top: 6px;
+    display: inline-block;
+  }
+
+  .tooltip-box .tt-range {
+    color: var(--green);
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  .field-wrap:hover .tooltip-box,
+  .tip-icon:focus + .tooltip-box { display: block; }
+
+
+  .qr-box {
+    width: 54px; height: 54px;
+    background: #fff;
+    padding: 3px;
+    border-radius: 3px;
+  }
+  .qr-box img, .qr-box canvas { width: 100%; height: 100%; }
+
+
+  /* ── BUTTON PRESS FEEDBACK ── */
+  .btn {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.12s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+
+  .btn.btn-flash {
+    animation: btnFlash 0.5s ease;
+  }
+  @keyframes btnFlash {
+    0%   { box-shadow: 0 0 0 0 rgba(226,0,26,0.55); }
+    50%  { box-shadow: 0 0 0 10px rgba(226,0,26,0); }
+    100% { box-shadow: 0 0 0 0 rgba(226,0,26,0); }
+  }
+
+  .btn.btn-done {
+    background: var(--green) !important;
+    border-color: var(--green) !important;
+    color: #fff !important;
+  }
+
+  /* ripple */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.45);
+    transform: scale(0);
+    animation: rippleGo 0.55s linear;
+    pointer-events: none;
+  }
+  @keyframes rippleGo { to { transform: scale(3.2); opacity: 0; } }
+
+  /* result flash when values update */
+  .result-item.updated {
+    animation: resultPop 0.6s ease;
+  }
+  @keyframes resultPop {
+    0%   { background: rgba(226,0,26,0.18); transform: translateY(-2px); }
+    100% { background: var(--mid); transform: translateY(0); }
+  }
+
+  /* toast */
+  .toast {
+    position: fixed;
+    bottom: 28px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--card);
+    border: 1px solid var(--red);
+    border-left: 4px solid var(--red);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 4px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    letter-spacing: 1px;
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.35s cubic-bezier(.2,.8,.2,1);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.55);
+    max-width: 90vw;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast .t-title { color: var(--red); font-weight: 700; display:block; font-size: 13px; letter-spacing: 2px; }
+  .toast .t-body { color: var(--muted); font-size: 12px; font-family: 'Barlow', sans-serif; letter-spacing: 0; }
+
+
+  /* ── LIGHT THEME ── */
+  body.theme-light {
+    --dark:   #FFFFFF;
+    --mid:    #F4F6F7;
+    --card:   #FFFFFF;
+    --border: #DFE3E6;
+    --text:   #14171A;
+    --muted:  #6B7280;
+    --accent: #D63030;
+    --green:  #0E9E6E;
+    --blue:   #0E7AC4;
+    --yellow: #C77700;
+  }
+  body.theme-light .card,
+  body.theme-light .result-item,
+  body.theme-light .metric,
+  body.theme-light .sensor-card,
+  body.theme-light .chart-wrap,
+  body.theme-light .event-log {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  body.theme-light .hero {
+    background: linear-gradient(135deg, #F4F6F7 0%, #FDF2F3 100%);
+  }
+  body.theme-light header { background: #FFFFFF; }
+  body.theme-light input[type="number"],
+  body.theme-light select { background: #FFFFFF; }
+  body.theme-light .tooltip-box { background: #FFFFFF; color: var(--text); }
+  body.theme-light .tooltip-box .tt-body { color: #4B5563; }
+  body.theme-light .toast { background: #FFFFFF; }
+  body.theme-light .product-table th { background: var(--mid); }
+  body.theme-light .dt-layer ul li::before { color: #C9CED3; }
+
+  body, header, .card, .hero, input, select, .result-item,
+  .sensor-card, .metric, .chart-wrap, .event-log, .tooltip-box {
+    transition: background-color .28s ease, color .28s ease, border-color .28s ease;
+  }
+
+  /* theme toggle button */
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 1px;
+    transition: all .2s ease;
+  }
+  .theme-toggle:hover { color: var(--red); border-color: var(--red); }
+  .theme-toggle .t-icon { font-size: 14px; line-height: 1; }
+
+
+  /* ── §7.2.2 CONTROL MODE PANEL ── */
+  .ctrl-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--red);
+    border-radius: 4px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .ctrl-group { margin-bottom: 18px; }
+  .ctrl-group:last-child { margin-bottom: 0; }
+  .ctrl-group-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 13px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--text);
+    margin-bottom: 4px;
+  }
+  .ctrl-group-ref {
+    font-size: 10.5px; color: var(--muted); margin-bottom: 10px;
+  }
+  .ctrl-modes { display: flex; flex-wrap: wrap; gap: 7px; }
+  .ctrl-btn {
+    padding: 7px 13px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600; font-size: 12px; letter-spacing: 0.8px;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    background: var(--mid); color: var(--muted);
+    border-radius: 3px; cursor: pointer;
+    transition: all .18s ease; position: relative;
+  }
+  .ctrl-btn:hover { border-color: var(--red); color: var(--text); }
+  .ctrl-btn.active {
+    background: var(--red); border-color: var(--red); color: #fff;
+  }
+  .ctrl-btn .dflt {
+    position: absolute; top: -7px; right: -5px;
+    font-size: 8px; letter-spacing: 0.5px;
+    background: var(--yellow); color: #000;
+    padding: 1px 4px; border-radius: 2px; font-weight: 700;
+  }
+  .ctrl-state {
+    margin-top: 12px; padding: 11px 14px;
+    background: var(--mid); border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    border-radius: 3px; font-size: 12px; line-height: 1.65;
+  }
+  .ctrl-state b { color: var(--green); font-family:'Barlow Condensed',sans-serif; letter-spacing:1px; }
+  .ctrl-state .sp { color: var(--blue); font-weight: 600; }
+  .pump-toggle {
+    display:flex; align-items:center; gap:10px;
+    padding: 9px 13px; background: var(--mid);
+    border:1px solid var(--border); border-radius:3px;
+    font-size:12px; cursor:pointer; width:fit-content;
+  }
+  .pump-toggle .led {
+    width:9px; height:9px; border-radius:50%;
+    background: var(--green); box-shadow:0 0 7px var(--green);
+  }
+  .pump-toggle.off .led { background: var(--muted); box-shadow:none; }
+
+  /* ── §20.4 dT TEST POINT BUTTONS ── */
+  .dt-tests { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .dt-btn {
+    flex:1; min-width:62px; padding:8px 6px;
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:600; font-size:12px; letter-spacing:0.5px;
+    border:1px solid var(--border); background:var(--mid);
+    color:var(--muted); border-radius:3px; cursor:pointer;
+    transition: all .18s ease;
+  }
+  .dt-btn:hover { border-color:var(--red); color:var(--text); }
+  .dt-btn.active { background:var(--red); border-color:var(--red); color:#fff; }
+
+
+  /* ── controlled-variable indicator ── */
+  .sensor-card.locked {
+    border-color: var(--red);
+    box-shadow: inset 0 0 0 1px rgba(226,0,26,.35);
+  }
+  .sensor-card.locked::after {
+    content: 'CTRL';
+    position: absolute; top: 6px; right: 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 8px; font-weight: 700; letter-spacing: 1px;
+    color: #fff; background: var(--red);
+    padding: 1px 5px; border-radius: 2px;
+  }
+  .sensor-card.floating { opacity: .82; }
+  .ctrl-effect {
+    margin-top: 8px; font-size: 11px; color: var(--yellow);
+    font-family: 'Barlow Condensed', sans-serif; letter-spacing: .5px;
+  }
+
+</style>
+</head>
+<body class="lang-en">
+
+<header>
+  <div class="logo">
+    <svg class="logo-mark" viewBox="0 0 126 55" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_danfoss)">
+<path d="M22.4784 55C14.6102 55 10.6761 55 7.67091 53.4686C5.0274 52.1214 2.87818 49.9719 1.53129 47.3281C0 44.3224 0 40.3878 0 32.5185V22.4815C0 14.6122 0 10.6776 1.53123 7.67195C2.87818 5.02808 5.0274 2.87857 7.67085 1.5315C10.6761 0 14.6102 0 22.4784 0H103.522C111.39 0 115.324 0 118.329 1.53144C120.973 2.87857 123.122 5.02809 124.469 7.67189C126 10.6775 126 14.6122 126 22.4814V32.5185C126 40.3877 126 44.3223 124.469 47.328C123.122 49.9719 120.973 52.1214 118.329 53.4684C115.324 54.9999 111.39 54.9999 103.522 54.9999L22.4784 55Z" fill="#ED071B"/>
+<path d="M16.6986 25.6797L20.6497 18.2737C26.0242 16.2586 31.943 14.7931 38.0554 14.7931C39.8085 14.7931 41.5773 14.9135 43.3514 15.1752L44.1625 13.6782C45.8162 13.4218 47.4647 13.2072 49.1184 13.024L46.9047 16.4156C49.0556 17.3577 51.0442 19.6973 51.0442 22.1886C51.0442 25.2557 49.6103 27.9616 47.9357 30.4792L50.3377 30.1913C51.5571 28.2181 54.4301 25.9204 56.5705 25.9204C57.2822 25.9204 57.9259 26.1769 58.3969 26.7788L59.0301 25.8733L62.0602 25.4179C59.6738 29.8354 58.287 31.3532 58.287 31.9551C58.287 32.0651 58.3288 32.1698 58.4544 32.1698C59.297 32.1698 63.6772 28.171 65.399 24.8684L68.272 24.5544L66.6655 27.4121L68.6384 25.7058C69.6798 24.8056 70.6114 24.0048 71.4957 24.0048C72.0557 24.0048 72.8145 24.2508 72.8145 25.0829C72.8145 26.7683 70.0514 29.94 70.0514 30.5838C70.0514 30.678 70.1089 30.7041 70.1717 30.7041C70.8834 30.7041 74.5886 27.9354 76.394 25.13L73.6937 25.5592L74.6409 23.8058L77.3151 23.4604C80.0102 18.4882 86.8238 9.26075 89.6236 9.26075C90.2411 9.26075 90.6597 9.72656 90.6597 10.4332C90.6597 12.8774 86.0702 18.3312 80.3189 22.445L79.8897 23.1987L85.7196 22.5497C85.8504 22.5393 85.9289 22.6178 85.9289 22.7172C85.9289 22.78 85.8975 22.8481 85.8295 22.9057C84.3014 24.1932 81.5435 27.0876 81.5435 28.731C81.5435 29.4062 82.0616 29.7987 82.6006 29.7987C84.2595 29.7987 86.604 26.2397 86.8186 25.5069C86.3476 25.3604 86.1435 24.8474 86.1435 24.2246C86.1435 22.9528 87.007 21.2308 88.2839 21.2308C88.7862 21.2308 89.4561 21.4663 89.4561 22.3614C89.4561 23.1778 88.9694 24.2246 88.713 24.7323C90.7592 24.4811 92.9623 22.7487 94.0508 21.5134C94.0508 19.4983 95.1864 17.3158 96.6099 17.3158C97.1594 17.3158 97.6251 17.5304 97.6251 18.1637C97.6251 18.9802 96.657 20.3829 95.4429 21.6496C95.4533 22.0212 95.4691 23.204 95.4481 23.6228C97.3635 22.958 99.4882 22.084 101.288 21.1733C101.315 19.1897 102.215 16.8239 103.753 16.8239C104.324 16.8239 104.789 17.0386 104.789 17.7242C104.789 18.7344 103.769 20.383 102.56 21.3513C102.607 22.1521 102.686 24.8633 102.686 25.4337C102.686 28.2077 100.823 30.3013 98.0491 30.3013C96.9763 30.3013 95.8826 29.7412 95.8826 28.6212C95.8826 26.2816 98.9702 24.6224 101.163 23.6646C101.194 23.2355 101.236 22.5341 101.236 22.1782C100.509 22.6179 97.531 23.7903 95.4848 24.5492C95.4011 28.3752 93.3392 30.7305 90.6179 30.7305C89.3777 30.7305 88.5246 30.2699 88.5246 29.0399C88.5246 26.5539 91.6122 25.1826 93.8573 24.2143C93.9619 23.8008 94.0247 23.0733 94.0038 22.8116C92.3396 24.2457 90.4138 25.7164 87.9646 25.774C86.7296 28.2234 83.8252 31.4423 81.2661 31.4423C80.0363 31.4423 78.8327 30.6782 78.8327 29.3592C78.8327 27.2709 81.4859 24.4812 81.8261 24.2143C80.9103 24.3033 79.9997 24.4498 79.0839 24.6644L74.3112 33.5097C85.5678 32.3478 96.8245 31.6255 105.632 31.6098L103.847 33.2742C104.69 33.8762 105.59 34.4624 106.495 34.97C97.8711 34.499 85.3376 34.9334 73.0919 35.7708L70.4752 40.6227L67.2359 40.8582L70.0252 35.9906C60.2339 36.7234 50.8559 37.6917 44.0841 38.6495L44.6179 37.7179C52.3265 36.2366 61.7148 34.8863 71.2603 33.8343L73.6466 29.6681C72.3697 30.7306 69.863 32.7666 68.1831 32.7666C67.5184 32.7666 66.9795 32.4578 66.9795 31.7513C66.9795 30.2125 69.4025 27.2501 69.4025 26.6587C69.4025 26.6011 69.3868 26.5645 69.3292 26.5645C68.7641 26.5645 64.6455 30.8354 63.1122 33.1959C62.2644 33.2587 61.4166 33.3477 60.5688 33.4628L61.8667 30.9558C60.4903 32.2276 58.1563 34.0438 56.7591 34.0438C56.3038 34.0438 55.7177 33.8135 55.4194 32.9866C54.3675 33.9287 52.63 35.0278 51.1072 35.0278C50.1967 35.0278 49.3332 34.6352 49.3332 33.1698C49.3332 32.4684 49.532 31.7513 49.6419 31.4897L47.0881 31.767C38.9871 41.1462 29.0911 44.4593 23.6747 44.4593C21.6704 44.4593 19.5143 44.0354 19.5143 42.1774C19.5143 39.3197 25.5796 35.8757 33.6282 33.3687L41.3472 18.8759C40.353 18.7241 39.3324 18.6561 38.3068 18.6561C30.7552 18.6561 21.5396 22.6601 16.6988 25.6801L16.6986 25.6797ZM24.6531 40.8842C24.6531 41.8107 25.8777 41.9833 26.8877 41.9833C30.6609 41.9833 38.5682 39.3821 44.3143 32.2587C39.259 33.0595 36.2446 34.1324 35.1457 34.5302L32.1732 39.0942C31.9325 39.4606 31.6342 39.8165 31.1527 39.8165C30.509 39.8165 30.4829 39.3036 30.7445 38.8116L32.5291 35.441C28.8711 36.5872 24.6531 39.2408 24.6531 40.8842ZM44.8115 19.6817L36.5273 32.4472C39.3689 31.683 43.791 30.9712 45.3139 30.809C46.0936 29.5528 47.9201 26.5224 47.9201 23.8478C47.9201 22.1102 47.1507 20.5243 44.8115 19.6817ZM53.6713 29.5528C53.0328 30.4112 52.3525 31.704 52.3525 32.5204C52.3525 32.9287 52.5462 33.2479 52.9491 33.2479C53.8021 33.2479 55.325 31.8923 55.8902 31.1648C56.738 30.0709 57.4549 28.663 57.4549 27.8831C57.4549 27.4173 57.1933 27.2551 56.7798 27.2551C55.6966 27.2551 54.1998 28.8409 53.6713 29.5528ZM81.5801 20.0114C83.2233 19.0065 86.7819 15.6202 87.8233 13.469C88.017 13.066 88.1216 12.7048 88.1216 12.4275C88.1216 12.1292 87.9907 11.8779 87.6924 11.8779C87.2424 11.8779 86.4888 12.4065 85.6515 13.4062C84.2123 15.1229 82.2865 18.3575 81.5801 20.0114ZM93.5327 25.35C92.7686 25.5594 90.3352 26.9673 90.3352 28.0036C90.3352 28.2443 90.4921 28.4694 90.8062 28.4694C92.0307 28.4694 93.271 26.5643 93.5327 25.35ZM100.87 24.9888C99.7498 25.2452 97.4995 26.6584 97.4995 27.7157C97.4995 27.9355 97.6408 28.1711 97.9914 28.1711C99.3416 28.1711 100.498 26.4543 100.87 24.9888Z" fill="white"/>
+</g>
+<defs>
+<clipPath id="clip0_danfoss">
+<rect width="126" height="55" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+    <div>
+      <div class="logo-text">OCP PROJECT DESCHUTES &middot; SPECIFICATION-ANCHORED DIGITAL TWIN</div>
+      <div class="logo-sub">
+        <span class="en-text">Research Prototype · v9.1 (September 2026) · OCP Project Deschutes v1.0</span>
+        <span class="zh-text">研究原型 · v9.1（2026 年 9 月）· OCP Project Deschutes v1.0</span>
+      </div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">
+      <span class="t-icon" id="theme-icon">☀</span>
+      <span id="theme-label">LIGHT</span>
+    </button>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>
+      <span class="en-text">Server &amp; CDU <span>Cooling</span> Advisor</span>
+      <span class="zh-text">伺服器 &amp; CDU <span>散熱</span>顧問工具</span>
+    </h1>
+    <p>
+      <span class="en-text">Calculate heat load, water flow rate and delta-T, and obtain an illustrative component reference mapping for data center liquid cooling infrastructure.</span>
+      <span class="zh-text">計算熱負載、水流量、溫差，並取得資料中心液冷基礎設施之元件參考對應。</span>
+    </p>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('cdu')">
+      <span class="en-text">CDU Calculator</span>
+      <span class="zh-text">CDU 計算</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('server')">
+      <span class="en-text">Server Rack Heat Load</span>
+      <span class="zh-text">機架熱負載</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('products')">
+      <span class="en-text">Product Reference</span>
+      <span class="zh-text">產品參考</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('monitor')">
+      <span class="blink-dot"></span>
+      <span class="en-text">Real-time Monitor</span>
+      <span class="zh-text">即時監控</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('ocp')">
+      <span class="en-text">OCP Deschutes</span>
+      <span class="zh-text">OCP 規範</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════ TAB 1: CDU CALCULATOR ═══════════════ -->
+  <div id="tab-cdu" class="tab-panel active">
+    <div class="grid-2">
+
+      <!-- INPUTS -->
+      <div class="card">
+        <div class="card-title"><span class="icon">⚙️</span>
+          <span class="en-text">System Parameters</span>
+          <span class="zh-text">系統參數設定</span>
+        </div>
+
+        <div class="section-label">
+          <span class="en-text">IT Load</span><span class="zh-text">IT 熱負載</span>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="en-text">Total IT Power per CDU</span>
+            <span class="zh-text">每台 CDU 的 IT 總功率</span>
+          </label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">IT Power per CDU</div>
+            <div class="tt-title zh-text">每台 CDU 的 IT 功率</div>
+            <div class="tt-body en-text">Total IT equipment power load handled by one CDU unit. For high-density GPU racks (e.g. NVIDIA H100), this can exceed 100 kW per rack.</div>
+            <div class="tt-body zh-text">每台 CDU 處理的 IT 設備總功率。高密度 GPU 機架（如 NVIDIA H100）每架可超過 100 kW。</div>
+          <div class="tt-formula">Q = IT Power × PUE</div>
+          <div class="tt-range">✔ Typical range: 50–500 kW</div>
+          </div>
+          <input type="number" id="it_power" value="2000" min="1" max="5000" step="1">
+          <div class="unit-hint">kW</div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="en-text">Number of CDU Units</span>
+            <span class="zh-text">CDU 台數</span>
+          </label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Number of CDU Units</div>
+            <div class="tt-title zh-text">CDU 台數</div>
+            <div class="tt-body en-text">Total number of Cooling Distribution Units in the system. Each CDU serves a set of server racks via a liquid cooling loop.</div>
+            <div class="tt-body zh-text">系統中的冷卻分配單元總台數。每台 CDU 透過液冷迴路服務一組伺服器機架。</div>
+          <div class="tt-formula">Total Heat = IT Power × CDU Count × PUE</div>
+          <div class="tt-range">✔ Typical: 1–20 units per zone</div>
+          </div>
+          <input type="number" id="cdu_count" value="1" min="1" max="100">
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="en-text">CDU Efficiency (PUE factor)</span>
+            <span class="zh-text">CDU 效率 (PUE 因子)</span>
+          </label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">PUE — Power Usage Effectiveness</div>
+            <div class="tt-title zh-text">PUE — 電源使用效率</div>
+            <div class="tt-body en-text">Ratio of total facility power to IT equipment power. PUE = 1.0 is ideal (100% efficient). Liquid cooling achieves PUE 1.03–1.15 vs air cooling 1.4–2.0.</div>
+            <div class="tt-body zh-text">總設施功率與 IT 設備功率的比值。PUE = 1.0 為理想值。液冷可達 1.03–1.15，遠優於風冷的 1.4–2.0。</div>
+          <div class="tt-formula">PUE = Total Facility Power / IT Power</div>
+          <div class="tt-range">✔ Liquid cooling target: 1.03–1.15</div>
+          </div>
+          <input type="number" id="pue" value="1.0" min="1.0" max="2.0" step="0.01">
+          <div class="unit-hint">
+            <span class="en-text">Typical: 1.05–1.15 for liquid cooling</span>
+            <span class="zh-text">液冷典型值：1.05–1.15</span>
+          </div>
+        </div>
+
+        <div class="section-label">
+          <span class="en-text">Water Circuit</span><span class="zh-text">水路參數</span>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="en-text">Supply Water Temp (Tw,in)</span>
+            <span class="zh-text">供水溫度 (Tw,in)</span>
+          </label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Supply Water Temperature (Tw,in)</div>
+            <div class="tt-title zh-text">供水溫度 (Tw,in)</div>
+            <div class="tt-body en-text">Inlet water temperature to the CDU from the facility chilled water system. Lower supply temp increases cooling capacity but raises chiller energy cost.</div>
+            <div class="tt-body zh-text">CDU 從設施冰水系統接收的進水溫度。供水溫度越低冷卻能力越強，但冷機能耗越高。</div>
+          <div class="tt-formula">ΔT = Tw,out − Tw,in</div>
+          <div class="tt-range">✔ ASHRAE W1: 20°C | W2: 25°C | W3: 35°C</div>
+          </div>
+          <input type="number" id="temp_in" value="30" min="18" max="55" step="0.5">
+          <div class="unit-hint">°C</div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="en-text">Return Water Temp (Tw,out)</span>
+            <span class="zh-text">回水溫度 (Tw,out)</span>
+          </label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Return Water Temperature (Tw,out)</div>
+            <div class="tt-title zh-text">回水溫度 (Tw,out)</div>
+            <div class="tt-body en-text">Outlet water temperature leaving the CDU back to the facility. Higher return temp means better energy efficiency. ΔT = Tw,out − Tw,in drives flow calculation.</div>
+            <div class="tt-body zh-text">從 CDU 回到設施的出水溫度。回水溫度越高代表能源效率越好。ΔT = 回水 − 供水，是流量計算的關鍵。</div>
+          <div class="tt-formula">ṁ = Q / (Cp × ΔT)</div>
+          <div class="tt-range">✔ Typical ΔT: 10–20°C</div>
+          </div>
+          <input type="number" id="temp_out" value="45" min="18" max="55" step="0.5">
+          <div class="unit-hint">°C</div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="en-text">Coolant Type</span>
+            <span class="zh-text">冷卻液類型</span>
+          </label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Coolant Type</div>
+            <div class="tt-title zh-text">冷卻液類型</div>
+            <div class="tt-body en-text">Pure water has best heat capacity (Cp = 4.182 kJ/kg·K). Glycol mixtures reduce freeze risk but lower Cp, requiring higher flow rates for same cooling.</div>
+            <div class="tt-body zh-text">純水比熱容最佳 (Cp = 4.182 kJ/kg·K)。乙二醇混合液防凍但 Cp 較低，相同冷卻量需要更大流量。</div>
+          <div class="tt-formula">Q = ṁ × Cp × ΔT</div>
+          <div class="tt-range">✔ Data center: usually pure water or ≤25% glycol</div>
+          </div>
+          <select id="coolant_type">
+            <option value="water" selected>DI Water (OCP approved)</option>
+            <option value="glycol25">PG25 — 25% Propylene Glycol (OCP approved)</option>
+            <option value="glycol40">PG40 — 40% Glycol (CoolTrain™ max)</option>
+          </select>
+        </div>
+
+        <div class="section-label">
+          <span class="en-text">Facility Side</span><span class="zh-text">設施側參數</span>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="en-text">Chilled Water Supply Temp</span>
+            <span class="zh-text">冰水供應溫度</span>
+          </label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Chilled Water Supply Temp (Facility side)</div>
+            <div class="tt-title zh-text">冰水供應溫度（設施側）</div>
+            <div class="tt-body en-text">Chilled water temperature supplied from the chiller plant to the CDU. Typical data center chiller supply: 7–15°C. Higher temp allows free cooling.</div>
+            <div class="tt-body zh-text">冷水機組提供給 CDU 的冰水溫度。資料中心冷機典型供水：7–15°C。溫度越高越有機會使用自由冷卻。</div>
+          <div class="tt-range">✔ Typical: 7–15°C | Free cooling: 18–24°C</div>
+          </div>
+          <input type="number" id="chw_in" value="27" min="4" max="55" step="0.5">
+          <div class="unit-hint">°C</div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="en-text">Chilled Water Return Temp</span>
+            <span class="zh-text">冰水回水溫度</span>
+          </label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Chilled Water Return Temp (Facility side)</div>
+            <div class="tt-title zh-text">冰水回水溫度（設施側）</div>
+            <div class="tt-body en-text">Return temperature of chilled water back to the chiller. ΔT = CHW,out − CHW,in determines facility-side flow rate. Larger ΔT = smaller pipe & pump size.</div>
+            <div class="tt-body zh-text">冰水回到冷機的溫度。ΔT = 回水 − 供水，決定設施側流量。ΔT 越大，管道與水泵尺寸越小。</div>
+          <div class="tt-formula">CHW Flow = Q / (Cp × ΔT_chw)</div>
+          <div class="tt-range">✔ Typical ΔT: 5–8°C</div>
+          </div>
+          <input type="number" id="chw_out" value="42" min="6" max="55" step="0.5">
+          <div class="unit-hint">°C</div>
+        </div>
+
+        <button class="btn btn-primary" id="btn-calc" onclick="btnRipple(event); calculate(true);">
+          <span class="en-text">▶ CALCULATE</span>
+          <span class="zh-text">▶ 計算</span>
+        </button>
+
+        <button class="btn" style="width:100%;justify-content:center;margin-top:8px;background:transparent;border:1.5px solid var(--muted);color:var(--muted);" id="btn-default" onclick="btnRipple(event); resetToDefault();">
+          <span class="en-text">↺ RESET TO DEFAULT (OCP §3.1)</span>
+          <span class="zh-text">↺ 回復預設值 (OCP §3.1)</span>
+        </button>
+
+        <div class="section-label" style="margin-top:20px;">
+          <span class="en-text">§20.4 HX Test Matrix — Secondary ΔT axis</span>
+          <span class="zh-text">§20.4 熱交換器測試矩陣 — 二次側 ΔT 軸</span>
+        </div>
+        <div class="unit-hint" style="margin-bottom:6px;">
+          <span class="en-text">OCP §20.4 Table 20.2.1 — full matrix is 4 x 4 x 5 = 80 points; this axis is 4 of them. DI water and PG25 both required</span>
+          <span class="zh-text">OCP §20.4 Table 20.2.1 — 完整矩陣為 4 x 4 x 5 = 80 點，此軸僅涵蓋其中 4 點。純水與 PG25 皆須執行</span>
+        </div>
+        <div class="dt-tests">
+          <button class="dt-btn" data-dt="10" onclick="setTestDT(10)">ΔT 10°C</button>
+          <button class="dt-btn active" data-dt="15" onclick="setTestDT(15)">ΔT 15°C</button>
+          <button class="dt-btn" data-dt="20" onclick="setTestDT(20)">ΔT 20°C</button>
+          <button class="dt-btn" data-dt="25" onclick="setTestDT(25)">ΔT 25°C</button>
+        </div>
+
+        <button class="btn" style="width:100%;justify-content:center;margin-top:8px;background:transparent;border:1.5px solid var(--red);color:var(--red);" id="btn-ocp" onclick="btnRipple(event); applyOCPPreset();">
+          <span class="en-text">⬡ OCP DESCHUTES PRESET (2 MW × 1)</span>
+          <span class="zh-text">⬡ OCP DESCHUTES 預設 (2 MW × 1)</span>
+        </button>
+      </div>
+
+      <!-- RESULTS RIGHT -->
+      <div>
+        <!-- FORMULAS -->
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-title"><span class="icon">📐</span>
+            <span class="en-text">Engineering Formulas</span>
+            <span class="zh-text">工程計算公式</span>
+          </div>
+          <div class="formula-box">
+            Q = ṁ × Cp × ΔT <span><br>
+            <span class="en-text">Heat Load = Mass Flow × Specific Heat × ΔT</span>
+            <span class="zh-text">熱負載 = 質量流量 × 比熱容 × 溫差</span>
+            </span>
+          </div>
+          <div class="formula-box" style="border-color:var(--green);">
+            ṁ = Q / (Cp × ΔT) <span><br>
+            <span class="en-text">Mass Flow [kg/s] from known Q &amp; ΔT</span>
+            <span class="zh-text">由已知 Q 與 ΔT 求質量流量 [kg/s]</span>
+            </span>
+          </div>
+          <div class="formula-box" style="border-color:var(--yellow);">
+            V̇ = ṁ / ρ <span><br>
+            <span class="en-text">Volume Flow [m³/h] from mass flow &amp; density</span>
+            <span class="zh-text">由質量流量與密度求體積流量 [m³/h]</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- RESULTS PANEL -->
+        <div id="results-panel" class="card">
+          <div class="card-title"><span class="icon">📊</span>
+            <span class="en-text">Calculation Results</span>
+            <span class="zh-text">計算結果</span>
+          </div>
+
+          <div class="result-grid">
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Total Heat Load</span><span class="zh-text">總熱負載</span></div>
+              <div class="result-value" id="r-heat">—</div>
+              <div class="result-unit">kW</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Server ΔT</span><span class="zh-text">伺服器側溫差</span></div>
+              <div class="result-value" id="r-dt">—</div>
+              <div class="result-unit">°C</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Mass Flow</span><span class="zh-text">質量流量</span></div>
+              <div class="result-value" id="r-mass">—</div>
+              <div class="result-unit">kg/s</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Volume Flow</span><span class="zh-text">體積流量</span></div>
+              <div class="result-value" id="r-vol">—</div>
+              <div class="result-unit">m³/h</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Flow (L/min)</span><span class="zh-text">流量 (L/min)</span></div>
+              <div class="result-value" id="r-lpm">—</div>
+              <div class="result-unit">L/min</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">CHW Flow</span><span class="zh-text">冰水流量</span></div>
+              <div class="result-value" id="r-chw">—</div>
+              <div class="result-unit">m³/h</div>
+            </div>
+            <div class="result-item" style="border-color:var(--red);">
+              <div class="result-label"><span class="en-text">Approach Temp</span><span class="zh-text">趨近溫度</span></div>
+              <div class="result-value" id="r-approach">—</div>
+              <div class="result-unit"><span class="en-text">°C (OCP ≤3°C)</span><span class="zh-text">°C (OCP ≤3°C)</span></div>
+            </div>
+            <div class="result-item" style="border-color:var(--blue);">
+              <div class="result-label"><span class="en-text">ASHRAE W-Class</span><span class="zh-text">ASHRAE W 等級</span></div>
+              <div class="result-value" id="r-wclass" style="color:var(--blue);">—</div>
+              <div class="result-unit"><span class="en-text">Liquid cooling class</span><span class="zh-text">液冷等級</span></div>
+            </div>
+          </div>
+
+          <div id="alert-box" class="alert" style="display:none;"></div>
+
+          <div class="section-label">
+            <span class="en-text">Illustrative Component Mapping</span>
+            <span class="zh-text">元件參考對應</span>
+          </div>
+
+          <div class="scroll-x">
+            <table class="product-table">
+              <thead>
+                <tr>
+                  <th><span class="en-text">Product</span><span class="zh-text">產品</span></th>
+                  <th><span class="en-text">Type</span><span class="zh-text">類型</span></th>
+                  <th><span class="en-text">Function</span><span class="zh-text">功能</span></th>
+                  <th><span class="en-text">Qty</span><span class="zh-text">數量</span></th>
+                </tr>
+              </thead>
+              <tbody id="product-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TAB 2: SERVER RACK ═══════════════ -->
+  <div id="tab-server" class="tab-panel">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="icon">🖥️</span>
+          <span class="en-text">Rack Heat Load Calculator</span>
+          <span class="zh-text">機架熱負載計算</span>
+        </div>
+
+        <div class="alert info" style="margin-bottom:16px;">
+          <span class="en-text"><b>OCP Project Deschutes v1.0 — spec values:</b><br>
+          • Load power support: <b>90 kW per rack spot</b> (1 s timescale, 3 of 4 feeds) — §18.8.1, p.61<br>
+          • Bay layout: <b>4 IT racks per side of hot aisle</b>, 5 mm gap — §18.3, p.55<br>
+          • Rack dimensions: 28" W × 50" D × 90.55" H max — §18.1, p.54<br>
+          • CDU thermal load: 2,000 kW — §3.1, p.11 · Min row length 46 ft — §18.2, p.54</span>
+          <span class="zh-text"><b>OCP Project Deschutes v1.0 — 規範值：</b><br>
+          • 電力支援：<b>每個 rack spot 90 kW</b>（1 秒時間尺度，4取3 供電）— §18.8.1, p.61<br>
+          • Bay 配置：<b>熱通道每側 4 架 IT 機架</b>，間隙 5 mm — §18.3, p.55<br>
+          • 機架尺寸：28" 寬 × 50" 深 × 最高 90.55" — §18.1, p.54<br>
+          • CDU 熱負載：2,000 kW — §3.1, p.11 · 最小列長 46 ft — §18.2, p.54</span>
+        </div>
+
+        <div class="form-group">
+          <label><span class="en-text">Number of Racks</span><span class="zh-text">機架數量</span></label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Number of Racks</div>
+            <div class="tt-title zh-text">機架數量</div>
+            <div class="tt-body en-text">Total server racks in the data hall. Used to calculate total IT load and required number of CDUs. Modern hyperscale DC: 1,000–10,000+ racks.</div>
+            <div class="tt-body zh-text">資料機房的伺服器機架總數。用於計算 IT 總負載與所需 CDU 台數。現代超大規模 DC：1,000–10,000+ 架。</div>
+          <div class="tt-formula">Total Load = Racks × Power/Rack</div>
+          <div class="tt-range">✔ Typical hall: 100–500 racks</div>
+          </div>
+          <input type="number" id="rack_count" value="8" min="1" max="1000">
+        </div>
+
+        <div class="form-group">
+          <label><span class="en-text">Power per Rack</span><span class="zh-text">每架功率</span></label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Power per Rack</div>
+            <div class="tt-title zh-text">每架功率</div>
+            <div class="tt-body en-text">Average IT power load per rack. Traditional air-cooled: 5–15 kW. High-density GPU racks: 30–100+ kW. NVIDIA GB200 NVL72: up to 120 kW/rack.</div>
+            <div class="tt-body zh-text">每架平均 IT 功率負載。傳統風冷：5–15 kW。高密度 GPU 機架：30–100+ kW。NVIDIA GB200 NVL72：最高 120 kW/架。</div>
+          <div class="tt-range">✔ AI/GPU rack: 30–120 kW | Standard: 5–15 kW</div>
+          </div>
+          <input type="number" id="rack_power" value="90" min="1" max="90" step="0.5">
+          <div class="unit-hint">kW / rack · <span class="en-text">OCP §18.8.1 max 90 kW</span><span class="zh-text">OCP §18.8.1 上限 90 kW</span></div>
+        </div>
+
+        <div class="form-group">
+          <label><span class="en-text">Cooling Method</span><span class="zh-text">冷卻方式</span></label>
+          <select id="cooling_method">
+            <option value="dlc">Direct Liquid Cooling (DLC)</option>
+            <option value="rdhx">Rear-Door HX (RDHX)</option>
+            <option value="immersion">Immersion Cooling</option>
+            <option value="air">Air Cooling (reference)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label><span class="en-text">Liquid Cooling Coverage (%)</span><span class="zh-text">液冷覆蓋率 (%)</span></label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Liquid Cooling Coverage (%)</div>
+            <div class="tt-title zh-text">液冷覆蓋率 (%)</div>
+            <div class="tt-body en-text">Percentage of rack heat removed by liquid cooling. The remainder is handled by air cooling (CRAC/CRAH). DLC/immersion: 70–100%. RDHX: 50–70%.</div>
+            <div class="tt-body zh-text">液冷移除熱量的百分比，其餘由風冷（CRAC/CRAH）處理。直接液冷/浸沒：70–100%。後門熱交換器：50–70%。</div>
+          <div class="tt-range">✔ DLC/Immersion: 70–100% | RDHX: 50–70%</div>
+          </div>
+          <input type="number" id="lc_coverage" value="70" min="0" max="100">
+          <div class="unit-hint"><span class="en-text">% of heat removed by liquid (rest by air)</span><span class="zh-text">% 由液冷移除的熱量 (其餘由風冷)</span></div>
+        </div>
+
+        <div class="form-group">
+          <label><span class="en-text">Supply Temp to Rack</span><span class="zh-text">機架供水溫度</span></label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Supply Temp to Rack</div>
+            <div class="tt-title zh-text">機架供水溫度</div>
+            <div class="tt-body en-text">Water temperature supplied to each server rack CDU manifold. Must be below server thermal limits. ASHRAE W1 spec: ≤20°C for standard operation.</div>
+            <div class="tt-body zh-text">供應給每架伺服器 CDU 歧管的水溫。必須低於伺服器熱限制。ASHRAE W1 標準：標準運行 ≤20°C。</div>
+          <div class="tt-range">✔ ASHRAE W1: ≤20°C | W2: ≤25°C</div>
+          </div>
+          <input type="number" id="rack_tin" value="30" min="18" max="55" step="0.5">
+          <div class="unit-hint">°C</div>
+        </div>
+
+        <div class="form-group">
+          <label><span class="en-text">Return Temp from Rack</span><span class="zh-text">機架回水溫度</span></label><span class="tip-icon" tabindex="0">?</span>
+          <div class="tooltip-box">
+            <div class="tt-title en-text">Return Temp from Rack</div>
+            <div class="tt-title zh-text">機架回水溫度</div>
+            <div class="tt-body en-text">Water temperature returning from server rack. High return temp = good energy recovery potential. Direct-to-chip liquid cooling typically returns 40–55°C.</div>
+            <div class="tt-body zh-text">從伺服器機架回水的溫度。回水溫越高代表廢熱回收潛力越好。晶片直冷液冷典型回水：40–55°C。</div>
+          <div class="tt-formula">ΔT = Tout − Tin</div>
+          <div class="tt-range">✔ D2C typical: 40–55°C</div>
+          </div>
+          <input type="number" id="rack_tout" value="45" min="18" max="55" step="0.5">
+          <div class="unit-hint">°C</div>
+        </div>
+
+        <button class="btn btn-primary" id="btn-rack-calc" onclick="btnRipple(event); calcRack(true);">
+          <span class="en-text">▶ CALCULATE RACK</span>
+          <span class="zh-text">▶ 計算機架</span>
+        </button>
+
+        <button class="btn" style="width:100%;justify-content:center;margin-top:8px;background:transparent;border:1.5px solid var(--muted);color:var(--muted);" id="btn-rack-default" onclick="btnRipple(event); resetRackDefault();">
+          <span class="en-text">↺ RESET TO DEFAULT (OCP §18.8.1)</span>
+          <span class="zh-text">↺ 回復預設值 (OCP §18.8.1)</span>
+        </button>
+
+        <button class="btn" style="width:100%;justify-content:center;margin-top:8px;background:transparent;border:1.5px solid var(--red);color:var(--red);" id="btn-rack-ocp" onclick="btnRipple(event); applyRackOCPPreset();">
+          <span class="en-text">⬡ OCP REDMOND HAC PRESET (1 BAY = 8 RACKS)</span>
+          <span class="zh-text">⬡ OCP REDMOND HAC 預設 (1 Bay = 8 架)</span>
+        </button>
+      </div>
+
+      <div id="rack-results" style="display:none;">
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-title"><span class="icon">📊</span>
+            <span class="en-text">Rack System Results</span>
+            <span class="zh-text">機架系統結果</span>
+          </div>
+          <div class="result-grid">
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Total IT Load</span><span class="zh-text">IT 總負載</span></div>
+              <div class="result-value" id="rk-total">—</div>
+              <div class="result-unit">kW</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Liquid Cooling Load</span><span class="zh-text">液冷負載</span></div>
+              <div class="result-value" id="rk-liq">—</div>
+              <div class="result-unit">kW</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Air Cooling Load</span><span class="zh-text">風冷負載</span></div>
+              <div class="result-value" id="rk-air">—</div>
+              <div class="result-unit">kW</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Total Flow Rate</span><span class="zh-text">總流量</span></div>
+              <div class="result-value" id="rk-flow">—</div>
+              <div class="result-unit">m³/h</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">Flow per Rack</span><span class="zh-text">每架流量</span></div>
+              <div class="result-value" id="rk-per">—</div>
+              <div class="result-unit">L/min</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label"><span class="en-text">CDUs Required</span><span class="zh-text">所需 CDU 數量</span></div>
+              <div class="result-value" id="rk-cdu">—</div>
+              <div class="result-unit">
+                <span class="en-text">units (100kW each)</span>
+                <span class="zh-text">台 (每台100kW)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="icon">🔧</span>
+            <span class="en-text">Danfoss Products for Rack System</span>
+            <span class="zh-text">機架系統 Danfoss 產品建議</span>
+          </div>
+          <div class="scroll-x">
+            <table class="product-table">
+              <thead>
+                <tr>
+                  <th><span class="en-text">Product</span><span class="zh-text">產品</span></th>
+                  <th><span class="en-text">Type</span><span class="zh-text">類型</span></th>
+                  <th><span class="en-text">Application</span><span class="zh-text">應用</span></th>
+                  <th><span class="en-text">Qty</span><span class="zh-text">數量</span></th>
+                </tr>
+              </thead>
+              <tbody id="rack-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TAB 3: PRODUCT REFERENCE ═══════════════ -->
+  <div id="tab-products" class="tab-panel">
+    <div class="alert info">
+      <span class="en-text">ℹ️ Illustrative vendor component mapping against selected OCP functional requirements. Inclusion does not constitute OCP certification, product qualification, or purchasing recommendation. QR codes link to public technical reference pages.</span>
+      <span class="zh-text">ℹ️ 依選定 OCP 功能需求之供應商元件示例對應。本頁不代表 OCP 認證、產品資格認定或正式採購／選型建議。QR code 連結至公開技術參考頁面。</span>
+    </div>
+
+    <div class="grid-2">
+      <!-- CONTROL -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🔴</span>
+          <span class="en-text">Control &amp; Intelligence</span><span class="zh-text">控制 &amp; 智能</span>
+        </div>
+        <table class="product-table">
+          <thead><tr>
+            <th><span class="en-text">Product</span><span class="zh-text">產品</span></th>
+            <th><span class="en-text">Key Spec</span><span class="zh-text">主要規格</span></th>
+            <th>QR</th>
+          </tr></thead>
+          <tbody>
+            <tr><td><div class="prod-name">Alsmart®</div><div class="prod-code">Programmable HVAC Controller</div></td><td><span class="en-text">Secure platform · remote monitoring · Modbus/TCP (OCP §21.1.6)</span><span class="zh-text">安全平台 · 遠端監控 · Modbus/TCP (OCP §21.1.6)</span></td><td><div class="qr-box" data-url="https://datacenters.danfoss.com"></div></td></tr>
+            <tr><td><div class="prod-name">iC7 Series</div><div class="prod-code">Variable Frequency Drive</div></td><td><span class="en-text">Auto Energy Optimization · condition-based monitoring · N+1 pump control</span><span class="zh-text">自動節能優化 · 狀態監測 · N+1 泵控制</span></td><td><div class="qr-box" data-url="https://datacenters.danfoss.com"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- HEAT EXCHANGERS -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🟠</span>
+          <span class="en-text">Heat Exchangers</span><span class="zh-text">熱交換器</span>
+        </div>
+        <table class="product-table">
+          <thead><tr>
+            <th><span class="en-text">Product</span><span class="zh-text">產品</span></th>
+            <th><span class="en-text">Key Spec</span><span class="zh-text">主要規格</span></th>
+            <th>QR</th>
+          </tr></thead>
+          <tbody>
+            <tr><td><div class="prod-name">BPHE</div><div class="prod-code">Brazed Plate Heat Exchanger</div></td><td><span class="en-text">Approach 2–4°C · up to 1.3 MW/unit · L2L optimized (OCP target ≤3°C)</span><span class="zh-text">趨近溫度 2–4°C · 單台最高 1.3 MW · 液對液優化 (OCP ≤3°C)</span></td><td><div class="qr-box" data-url="https://datacenters.danfoss.com"></div></td></tr>
+            <tr><td><div class="prod-name">GPHE</div><div class="prod-code">Gasketed Plate Heat Exchanger</div></td><td><span class="en-text">Close approach · engineered for 2+MW CDUs &amp; skid builds</span><span class="zh-text">緊密趨近 · 專為 2+MW CDU 與撬裝設計</span></td><td><div class="qr-box" data-url="https://datacenters.danfoss.com"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- VALVES -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🔵</span>
+          <span class="en-text">Valves &amp; Hydronics</span><span class="zh-text">閥件 &amp; 水路</span>
+        </div>
+        <table class="product-table">
+          <thead><tr>
+            <th><span class="en-text">Product</span><span class="zh-text">產品</span></th>
+            <th><span class="en-text">Key Spec</span><span class="zh-text">主要規格</span></th>
+            <th>QR</th>
+          </tr></thead>
+          <tbody>
+            <tr><td><div class="prod-name">AB-QM + NovoCon®</div><div class="prod-code">PICV + Digital Actuator</div></td><td><span class="en-text">100% authority · bus data collection · hydronic independence</span><span class="zh-text">100% 閥權 · 匯流排數據 · 水力獨立</span></td><td><div class="qr-box" data-url="https://datacenters.danfoss.com"></div></td></tr>
+            <tr><td><div class="prod-name">AFQM 2 + AME 659SD</div><div class="prod-code">PICV + TüV Spring-Down Actuator</div></td><td><span class="en-text">Modulating gear actuator · certified fail-safe</span><span class="zh-text">調節式齒輪驅動 · 認證失效保護</span></td><td><div class="qr-box" data-url="https://datacenters.danfoss.com"></div></td></tr>
+            <tr><td><div class="prod-name">FVF Strainer</div><div class="prod-code">CDU Filtration</div></td><td><span class="en-text">Particle protection · draining ball valves (OCP §3.2: 25–44 μm)</span><span class="zh-text">顆粒防護 · 排水球閥 (OCP §3.2: 25–44 μm)</span></td><td><div class="qr-box" data-url="https://datacenters.danfoss.com"></div></td></tr>
+            <tr><td><div class="prod-name">VFY-LH</div><div class="prod-code">Butterfly Valve</div></td><td><span class="en-text">Temporary flow stops for service/maintenance</span><span class="zh-text">維修用臨時斷流</span></td><td><div class="qr-box" data-url="https://datacenters.danfoss.com"></div></td></tr>
+            <tr><td><div class="prod-name">CoolTrain™</div><div class="prod-code">Pre-built Valve Train</div></td><td><span class="en-text">Plug-n-play CDU↔rack · PG25 filled &amp; sealed · up to 40% glycol</span><span class="zh-text">隨插即用 CDU↔機架 · PG25 預充密封 · 最高 40% 乙二醇</span></td><td><div class="qr-box" data-url="https://datacenters.danfoss.com"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SENSORS -->
+      <div class="card">
+        <div class="card-title"><span class="icon">🟢</span>
+          <span class="en-text">Sensors &amp; Telemetry (OCP §7.2.1)</span><span class="zh-text">感測器 &amp; 遙測 (OCP §7.2.1)</span>
+        </div>
+        <table class="product-table">
+          <thead><tr>
+            <th><span class="en-text">Product</span><span class="zh-text">產品</span></th>
+            <th><span class="en-text">Key Spec</span><span class="zh-text">主要規格</span></th>
+            <th>QR</th>
+          </tr></thead>
+          <tbody>
+            <tr><td><div class="prod-name">DST P110</div><div class="prod-code">Pressure Sensor</div></td><td><span class="en-text">Precision cooling water cycles · superior accuracy</span><span class="zh-text">精密冷卻水循環 · 高精度</span></td><td><div class="qr-box" data-url="https://datacenters.danfoss.com"></div></td></tr>
+            <tr><td><div class="prod-name">DST P140</div><div class="prod-code">Pressure Sensor · MEMS</div></td><td><span class="en-text">Oil-filled MEMS · high overload &amp; burst capability</span><span class="zh-text">充油式 MEMS · 高過載與爆破能力</span></td><td><div class="qr-box" data-url="https://datacenters.danfoss.com"></div></td></tr>
+            <tr><td><div class="prod-name">MBT 3270</div><div class="prod-code">Temperature Sensor</div></td><td><span class="en-text">Highest accuracy · customized condition monitoring</span><span class="zh-text">最高精度 · 客製化狀態監測</span></td><td><div class="qr-box" data-url="https://datacenters.danfoss.com"></div></td></tr>
+            <tr><td><div class="prod-name">MBT 3560</div><div class="prod-code">Temperature Sensor</div></td><td><span class="en-text">DC mission-critical · reliable &amp; robust</span><span class="zh-text">資料中心關鍵任務 · 可靠耐用</span></td><td><div class="qr-box" data-url="https://datacenters.danfoss.com"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TAB 4: REAL-TIME MONITOR ═══════════════ -->
+  <div id="tab-monitor" class="tab-panel">
+
+    <!-- ═══ §7.2.2 CONTROLLABLE PARAMETERS VIA PLC ═══ -->
+    <div class="card-title" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+      <span class="icon">⚙</span>
+      <span class="en-text">Controllable Parameters via PLC — OCP §7.2.2, p.27</span>
+      <span class="zh-text">PLC 可控參數 — OCP §7.2.2, p.27</span>
+    </div>
+
+    <div class="ctrl-panel">
+
+      <!-- PUMP SPEED CONTROL -->
+      <div class="ctrl-group">
+        <div class="ctrl-group-title">
+          <span class="en-text">Pump Speed Control</span><span class="zh-text">泵速控制</span>
+        </div>
+        <div class="ctrl-group-ref">
+          <span class="en-text">OCP §7.2.2 — 5 selectable modes · DEFAULT: Fixed pressure drop control</span>
+          <span class="zh-text">OCP §7.2.2 — 5 種可選模式 · 預設：固定壓差控制</span>
+        </div>
+        <div class="ctrl-modes">
+          <button class="ctrl-btn active" data-pump="dp"     onclick="setPumpMode('dp')">Fixed ΔP<span class="dflt">DEFAULT</span></button>
+          <button class="ctrl-btn"        data-pump="flow"   onclick="setPumpMode('flow')">Fixed Flow</button>
+          <button class="ctrl-btn"        data-pump="supply" onclick="setPumpMode('supply')">Fixed Supply Temp</button>
+          <button class="ctrl-btn"        data-pump="return" onclick="setPumpMode('return')">Fixed Return Temp</button>
+          <button class="ctrl-btn"        data-pump="speed"  onclick="setPumpMode('speed')">Fixed Speed</button>
+        </div>
+        <div class="ctrl-state" id="pump-state"></div>
+      </div>
+
+      <!-- PUMP ENABLE / DISABLE -->
+      <div class="ctrl-group">
+        <div class="ctrl-group-title">
+          <span class="en-text">Pump Enable / Disable</span><span class="zh-text">泵浦啟停</span>
+        </div>
+        <div class="ctrl-group-ref">
+          <span class="en-text">OCP §7.2.2 · N+1 redundancy per §3.2 item 4</span>
+          <span class="zh-text">OCP §7.2.2 · N+1 冗餘依 §3.2 第 4 項</span>
+        </div>
+        <div class="pump-toggle" id="pump-toggle" onclick="togglePump()">
+          <span class="led"></span>
+          <span id="pump-toggle-label">PUMP 1 + PUMP 2 (N+1) — ENABLED</span>
+        </div>
+      </div>
+
+      <!-- PRIMARY VALVE CONTROL -->
+      <div class="ctrl-group">
+        <div class="ctrl-group-title">
+          <span class="en-text">Primary Circuit Control Valve Position</span>
+          <span class="zh-text">主迴路控制閥開度</span>
+        </div>
+        <div class="ctrl-group-ref">
+          <span class="en-text">OCP §7.2.2 — 3 selectable modes · DEFAULT: Approach temperature control</span>
+          <span class="zh-text">OCP §7.2.2 — 3 種可選模式 · 預設：趨近溫度控制</span>
+        </div>
+        <div class="ctrl-modes">
+          <button class="ctrl-btn active" data-valve="approach" onclick="setValveMode('approach')">Approach Temp<span class="dflt">DEFAULT</span></button>
+          <button class="ctrl-btn"        data-valve="opening"  onclick="setValveMode('opening')">Fixed Opening</button>
+          <button class="ctrl-btn"        data-valve="secsup"   onclick="setValveMode('secsup')">Fixed Sec. Supply Temp</button>
+        </div>
+        <div class="ctrl-state" id="valve-state"></div>
+      </div>
+
+      <div class="alert info" style="margin:0;">
+        <span class="en-text">§7.2.2 verbatim: "∆T<sub>approach</sub> = T<sub>secondary liquid supply, cold</sub> − T<sub>primary liquid supply, cold</sub>" · "CDU shall be controllable individually or as part of a group of CDUs connected in parallel."</span>
+        <span class="zh-text">§7.2.2 原文：「∆T<sub>approach</sub> = T<sub>secondary liquid supply, cold</sub> − T<sub>primary liquid supply, cold</sub>」·「CDU 應可單獨控制，或作為並聯 CDU 群組的一部分控制。」</span>
+      </div>
+    </div>
+
+
+    <!-- DIGITAL TWIN ARCHITECTURE -->
+    <div class="card-title" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+      <span class="icon">🔁</span>
+      <span class="en-text">Digital Twin Architecture — Reference Layers</span>
+      <span class="zh-text">Digital Twin 架構 — 參考層級</span>
+    </div>
+
+    <div class="dt-arch">
+      <div class="dt-layer l1">
+        <div class="dt-layer-num">Layer 1</div>
+        <div class="dt-layer-title">Physical System</div>
+        <ul>
+          <li>Server / GPU Rack</li>
+          <li>CDU Unit</li>
+          <li>Facility Water</li>
+          <li>Pump / Valve</li>
+        </ul>
+        <span class="dt-arrow">›</span>
+      </div>
+      <div class="dt-layer l2">
+        <div class="dt-layer-num">Layer 2</div>
+        <div class="dt-layer-title">Real-time Data</div>
+        <ul>
+          <li>Temp sensors</li>
+          <li>Flow meters</li>
+          <li>Pressure tx</li>
+          <li>Power meters</li>
+        </ul>
+        <span class="dt-arrow">›</span>
+      </div>
+      <div class="dt-layer l3">
+        <div class="dt-layer-num">Layer 3</div>
+        <div class="dt-layer-title">Digital Twin Model</div>
+        <ul>
+          <li>Thermal model</li>
+          <li>Flow simulation</li>
+          <li>System state</li>
+          <li>Live sync</li>
+        </ul>
+        <span class="dt-arrow">›</span>
+      </div>
+      <div class="dt-layer l4">
+        <div class="dt-layer-num">Layer 4</div>
+        <div class="dt-layer-title">Analysis &amp; Advisory</div>
+        <ul>
+          <li>Operating checks</li>
+          <li>Clause traceability</li>
+          <li>Scenario analysis</li>
+          <li>Capacity sizing</li>
+        </ul>
+        <span class="dt-arrow">›</span>
+      </div>
+      <div class="dt-layer l5">
+        <div class="dt-layer-num">Layer 5</div>
+        <div class="dt-layer-title">Control — Simulated</div>
+        <ul>
+          <li>Valve position</li>
+          <li>Pump speed</li>
+          <li>Flow setpoint</li>
+          <li>↩ Feedback path declared</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- LIVE SENSOR CARDS -->
+    <div class="section-label" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin:20px 0 12px;display:flex;align-items:center;gap:10px;">
+      <span class="blink-dot"></span>
+      <span class="en-text">Live Sensor Data — synced from Calculator inputs</span>
+      <span class="zh-text">即時感測器數據 — 與計算機輸入同步</span>
+      <span style="flex:1;height:1px;background:var(--border);"></span>
+      <span id="last-update" style="font-size:11px;color:var(--muted);"></span>
+    </div>
+
+    <div class="kpi-grid" id="sensor-kpi">
+      <!-- Tier 1 — 6 primary CDU signals, injected by JS -->
+    </div>
+
+    <button class="detail-toggle" id="detail-toggle" onclick="toggleDetail()">
+      <span class="en-text">Show all sensor points — full §7.2.1 telemetry (6 more)</span>
+      <span class="zh-text">顯示全部感測點 — §7.2.1 完整遙測（另 6 筆）</span>
+      <span class="chev">▾</span>
+    </button>
+
+    <div id="sensor-detail">
+      <!-- Tier 2 — grouped by loop, injected by JS -->
+    </div>
+
+    <!-- CHARTS -->
+    <div class="grid-monitor-bottom">
+      <div class="chart-wrap">
+        <div class="chart-title">
+          <span class="en-text">🌡️ Temperature Trend</span><span class="zh-text">🌡️ 溫度趨勢</span>
+          <span class="chart-live-badge">LIVE</span>
+        </div>
+        <canvas id="tempChart" height="140"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">
+          <span class="en-text">💧 Flow Rate Trend</span><span class="zh-text">💧 流量趨勢</span>
+          <span class="chart-live-badge">LIVE</span>
+        </div>
+        <canvas id="flowChart" height="140"></canvas>
+      </div>
+    </div>
+
+    <!-- EVENT LOG -->
+    <div class="grid-monitor-bottom">
+      <div>
+        <div class="section-label" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;gap:10px;">
+          <span class="en-text">System Event Log</span><span class="zh-text">系統事件記錄</span>
+          <span style="flex:1;height:1px;background:var(--border);"></span>
+        </div>
+        <div class="event-log" id="event-log"></div>
+      </div>
+      <div>
+        <div class="section-label" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;gap:10px;">
+          <span class="en-text">Operational Advisory — Demonstration Only</span><span class="zh-text">運轉提示 — 展示模擬</span>
+          <span style="flex:1;height:1px;background:var(--border);"></span>
+        </div>
+        <div class="card" style="padding:16px;">
+          <div style="display:flex;flex-direction:column;gap:10px;" id="advisory-list">
+            <!-- injected -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ═══════════════ TAB 5: OCP DESCHUTES ═══════════════ -->
+  <div id="tab-ocp" class="tab-panel">
+    <div class="alert info">
+      <span class="en-text">ℹ️ OCP Project Deschutes v1.0 (Effective Feb 26, 2026) — 2 MW Next-Generation CDU specification for AI/ML high-density pods. This platform's Digital Twin model layer is built on this specification.</span>
+      <span class="zh-text">ℹ️ OCP Project Deschutes v1.0（2026/2/26 生效）— 針對 AI/ML 高密度機房的 2 MW 次世代 CDU 規範。本平台的 Digital Twin 模型層以此規範為基礎。</span>
+    </div>
+
+    <div class="grid-2">
+      <!-- SPEC TABLE -->
+      <div class="card">
+        <div class="card-title"><span class="icon">⬡</span>
+          <span class="en-text">Deschutes Technical Specification (§3.1)</span>
+          <span class="zh-text">Deschutes 技術規格 (§3.1)</span>
+        </div>
+        <div class="spec-row"><span class="spec-key">Thermal load</span><span class="spec-val">2,000 kW</span></div>
+        <div class="spec-row"><span class="spec-key">IT flow</span><span class="spec-val">500 GPM (113.6 m³/h)</span></div>
+        <div class="spec-row"><span class="spec-key">Facility flow</span><span class="spec-val">0.25 GPM/kW → 500 GPM</span></div>
+        <div class="spec-row"><span class="spec-key">Approach temperature</span><span class="spec-val" style="color:var(--red);">≤ 3°C</span></div>
+        <div class="spec-row"><span class="spec-key">Operating liquid temp (§5)</span><span class="spec-val">18–55°C (W17→W+)</span></div>
+        <div class="spec-row"><span class="spec-key">IT dP available</span><span class="spec-val">80–90 psi</span></div>
+        <div class="spec-row"><span class="spec-key">Facility dP</span><span class="spec-val">15–30 psi</span></div>
+        <div class="spec-row"><span class="spec-key">Operating pressure</span><span class="spec-val">0–130 psig · relief @ 130 psi</span></div>
+        <div class="spec-row"><span class="spec-key">Power consumption</span><span class="spec-val">74 kW</span></div>
+        <div class="spec-row"><span class="spec-key">Pump voltage</span><span class="spec-val">380–416 Vac · N+1</span></div>
+        <div class="spec-row"><span class="spec-key">Heat exchanger</span><span class="spec-val">L2L dual-pass × 3 parallel</span></div>
+        <div class="spec-row"><span class="spec-key">Coolants</span><span class="spec-val">DI water / PG25</span></div>
+        <div class="spec-row"><span class="spec-key">Flow meter accuracy</span><span class="spec-val">±0.5% of reading</span></div>
+        <div class="spec-row"><span class="spec-key">Leak detection</span><span class="spec-val">Rope · 3 zones · PLC</span></div>
+        <div class="spec-row"><span class="spec-key">Filtration</span><span class="spec-val">25–44 μm + 0.2 μm side-stream @ 3 GPM</span></div>
+        <div class="spec-row"><span class="spec-key">Communication (§7.2.3)</span><span class="spec-val">Modbus/TCP · IPv4+IPv6 — software representation</span></div>
+        <div class="spec-row"><span class="spec-key">CDU weight (wet / dry, max)</span><span class="spec-val">6,900 / 5,310 lbs</span></div>
+        <div class="spec-row"><span class="spec-key">Max height with packaging</span><span class="spec-val">100 in</span></div>
+        <div class="spec-row"><span class="spec-key">Wetted materials</span><span class="spec-val">Stainless steel · copper · EPDM</span></div>
+        <div class="spec-row"><span class="spec-key">Pump type</span><span class="spec-val">Sealless · N+1</span></div>
+        <div class="spec-row"><span class="spec-key">Air separator / expansion tank</span><span class="spec-val">Spirovent · flow-through, front serviceable</span></div>
+        <div class="spec-row"><span class="spec-key">Certification</span><span class="spec-val">UL / CE · seismic bracing &amp; test</span></div>
+      </div>
+
+      <!-- DANFOSS MAPPING -->
+      <div class="card">
+        <div class="card-title"><span class="icon">✔</span>
+          <span class="en-text">OCP Requirement → Danfoss Solution Mapping</span>
+          <span class="zh-text">OCP 需求 → Danfoss 方案對應</span>
+        </div>
+        <div class="scroll-x">
+          <table class="product-table">
+            <thead><tr>
+              <th><span class="en-text">OCP Requirement</span><span class="zh-text">OCP 需求</span></th>
+              <th><span class="en-text">Danfoss Solution</span><span class="zh-text">Danfoss 方案</span></th>
+            </tr></thead>
+            <tbody>
+              <tr><td><span class="en-text">≤3°C approach @ 2 MW HX</span><span class="zh-text">2 MW 熱交換 ≤3°C 趨近溫度</span></td><td><span class="tag tag-valve">BPHE / GPHE</span> <span class="en-text">2–4°C approach portfolio</span><span class="zh-text">2–4°C 趨近溫度產品組合</span></td></tr>
+              <tr><td><span class="en-text">±0.5% flow accuracy telemetry</span><span class="zh-text">±0.5% 流量精度遙測</span></td><td><span class="tag tag-sensor">DST P110/P140 · MBT 3270/3560</span></td></tr>
+              <tr><td><span class="en-text">N+1 pump w/ energy optimization</span><span class="zh-text">N+1 泵 + 節能優化</span></td><td><span class="tag tag-drive">iC7 VFD</span> <span class="en-text">Auto Energy Optimization + condition monitoring</span><span class="zh-text">自動節能 + 狀態監測</span></td></tr>
+              <tr><td><span class="en-text">Modbus/TCP PLC + HMI control (architecture only)</span><span class="zh-text">Modbus/TCP PLC + HMI 控制（僅架構）</span></td><td><span class="tag tag-controller">Alsmart®</span> <span class="en-text">programmable secure controller</span><span class="zh-text">可程式安全控制器</span></td></tr>
+              <tr><td><span class="en-text">Hydronic balance CDU↔racks</span><span class="zh-text">CDU↔機架水力平衡</span></td><td><span class="tag tag-valve">AB-QM + NovoCon® · CoolTrain™</span></td></tr>
+              <tr><td><span class="en-text">25–44 μm serviceable filtration</span><span class="zh-text">25–44 μm 可維護過濾</span></td><td><span class="tag tag-valve">FVF Strainers</span></td></tr>
+              <tr><td><span class="en-text">Service isolation</span><span class="zh-text">維修隔離</span></td><td><span class="tag tag-valve">VFY-LH Butterfly Valves</span></td></tr>
+              <tr><td><span class="en-text">PG25 coolant compatibility</span><span class="zh-text">PG25 冷卻液相容</span></td><td><span class="tag tag-valve">CoolTrain™</span> <span class="en-text">PG25 pre-filled, up to 40% glycol</span><span class="zh-text">PG25 預充，最高 40% 乙二醇</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-label" style="margin-top:20px;">
+          <span class="en-text">§7.2 Controls &amp; Telemetry Coverage</span>
+          <span class="zh-text">§7.2 控制與遙測涵蓋</span>
+        </div>
+        <div class="scroll-x">
+          <table class="product-table">
+            <thead><tr>
+              <th><span class="en-text">Clause</span><span class="zh-text">條號</span></th>
+              <th><span class="en-text">Requirement</span><span class="zh-text">要求</span></th>
+              <th><span class="en-text">Status</span><span class="zh-text">狀態</span></th>
+            </tr></thead>
+            <tbody>
+              <tr><td>§7.2.2</td><td><span class="en-text">Pump speed — 5 modes, DEFAULT fixed ΔP</span><span class="zh-text">泵速 — 5 種模式，預設固定壓差</span></td><td><span class="tag tag-sensor">5 / 5</span></td></tr>
+              <tr><td>§7.2.2</td><td><span class="en-text">Pump enable / disable</span><span class="zh-text">泵浦啟停</span></td><td><span class="tag tag-sensor">✔</span></td></tr>
+              <tr><td>§7.2.2</td><td><span class="en-text">Valve position — 3 modes, DEFAULT approach temp</span><span class="zh-text">閥開度 — 3 種模式，預設趨近溫度</span></td><td><span class="tag tag-sensor">3 / 3</span></td></tr>
+              <tr><td>§7.2.1</td><td><span class="en-text">Manifold temperature (RWS / RWR / PCWS / PCWR)</span><span class="zh-text">Manifold 溫度 (RWS / RWR / PCWS / PCWR)</span></td><td><span class="tag tag-sensor">4 / 4</span></td></tr>
+              <tr><td>§7.2.1</td><td><span class="en-text">Absolute pressure on each manifold</span><span class="zh-text">各 Manifold 絕對壓力</span></td><td><span class="tag tag-sensor">4 / 4</span></td></tr>
+              <tr><td>§7.2.1</td><td><span class="en-text">Leak alarm — 3 zones</span><span class="zh-text">洩漏警報 — 3 區</span></td><td><span class="tag tag-sensor">✔</span></td></tr>
+              <tr><td>§7.2.1</td><td><span class="en-text">Pump speed — RPM and percent, per pump</span><span class="zh-text">泵浦轉速 — RPM 與 %，每台獨立</span></td><td><span class="tag tag-sensor">✔</span></td></tr>
+              <tr><td>§7.2.1</td><td><span class="en-text">Power consumption per pump</span><span class="zh-text">每台泵浦功耗</span></td><td><span class="tag tag-sensor">✔</span></td></tr>
+              <tr><td>§7.2.1</td><td><span class="en-text">Primary circuit control valve position</span><span class="zh-text">主迴路控制閥位</span></td><td><span class="tag tag-sensor">✔</span></td></tr>
+              <tr><td>§7.2.1</td><td><span class="en-text">Motor overtemp alarm</span><span class="zh-text">馬達過溫警報</span></td><td><span class="tag tag-sensor">✔</span></td></tr>
+              <tr><td>§7.2.3</td><td><span class="en-text">Modbus/TCP · IPv4 + IPv6 dual stack — architecture defined in software; §21.1.6 functional test not performed</span><span class="zh-text">Modbus/TCP · IPv4+IPv6 雙堆疊 — 軟體層架構已定義，未執行 §21.1.6 功能測試</span></td><td><span class="tag tag-controller">SIMULATED</span></td></tr>
+              <tr><td>§20.4</td><td><span class="en-text">HX test matrix — secondary ΔT axis only (matrix is 4 × 4 × 5 = 80 points)</span><span class="zh-text">熱交換測試矩陣 — 僅涵蓋二次側 ΔT 軸（完整矩陣為 4 × 4 × 5 = 80 點）</span></td><td><span class="tag tag-controller">PARTIAL 4 / 80</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card" style="margin-top:18px;">
+          <div class="card-title">
+            <span class="en-text">OCP Clause Traceability Matrix</span>
+            <span class="zh-text">OCP 條文追溯矩陣</span>
+          </div>
+          <p style="font-size:12px;opacity:.75;margin:0 0 10px;">
+            <span class="en-text">Each clause below is mapped to where it is realised in this artefact and to the honest status of that realisation. "Simulated" means the behaviour is represented in software without hardware validation. "Not implemented" means the requirement is acknowledged and deferred to future work.</span>
+            <span class="zh-text">下表將每一條文對應到本系統的實作位置，並誠實標示其實作狀態。「模擬」表示以軟體呈現行為但未經硬體驗證；「未實作」表示已辨識該要求並列入未來工作。</span>
+          </p>
+          <table class="prod-table">
+            <thead>
+              <tr>
+                <th><span class="en-text">Clause</span><span class="zh-text">條文</span></th>
+                <th><span class="en-text">Requirement</span><span class="zh-text">要求</span></th>
+                <th><span class="en-text">Implementation</span><span class="zh-text">實作位置</span></th>
+                <th><span class="en-text">Status</span><span class="zh-text">狀態</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>§3.1</td><td><span class="en-text">2 MW design point, 500 GPM, 3 °C approach</span><span class="zh-text">2 MW 設計點、500 GPM、3 °C 趨近溫度</span></td><td><span class="en-text">CDU Calculator</span><span class="zh-text">CDU 計算器</span></td><td><span class="tag tag-sensor">Implemented</span></td></tr>
+              <tr><td>§5.1</td><td><span class="en-text">Hydraulic characteristic curves</span><span class="zh-text">水力特性曲線</span></td><td><span class="en-text">Polynomial model, PG25 basis</span><span class="zh-text">多項式模型，PG25 基礎</span></td><td><span class="tag tag-sensor">Implemented — PG25 basis</span></td></tr>
+              <tr><td>§5.2</td><td><span class="en-text">Approved coolants (DI water, PG25)</span><span class="zh-text">認可冷卻液（純水、PG25）</span></td><td><span class="en-text">Coolant selector + §5.2 check</span><span class="zh-text">冷卻液選單 + §5.2 檢查</span></td><td><span class="tag tag-sensor">Implemented</span></td></tr>
+              <tr><td>§5.3</td><td><span class="en-text">Approach temperature ≤ 3 °C</span><span class="zh-text">趨近溫度 ≤ 3 °C</span></td><td><span class="en-text">Calculator</span><span class="zh-text">計算器</span></td><td><span class="tag tag-sensor">Implemented</span></td></tr>
+              <tr><td>§7.2.1</td><td><span class="en-text">System feedback telemetry</span><span class="zh-text">系統回饋遙測</span></td><td><span class="en-text">Real-time Monitor, 32 signals</span><span class="zh-text">即時監控，32 個訊號</span></td><td><span class="tag tag-controller">Simulated</span></td></tr>
+              <tr><td>§7.2.2</td><td><span class="en-text">Pump and valve control modes</span><span class="zh-text">泵浦與閥門控制模式</span></td><td><span class="en-text">Control UI; fixed-ΔP solved from §5.1</span><span class="zh-text">控制介面；固定壓差由 §5.1 求解</span></td><td><span class="tag tag-controller">Simulated — behavioural</span></td></tr>
+              <tr><td>§7.2.3</td><td><span class="en-text">Modbus/TCP over IPv4 and IPv6</span><span class="zh-text">Modbus/TCP 經 IPv4 與 IPv6</span></td><td><span class="en-text">Architecture defined in software</span><span class="zh-text">軟體層架構已定義</span></td><td><span class="tag tag-controller">Not physically validated</span></td></tr>
+              <tr><td>§20.4</td><td><span class="en-text">Heat exchanger validation matrix</span><span class="zh-text">熱交換器驗證矩陣</span></td><td><span class="en-text">Secondary ΔT axis only</span><span class="zh-text">僅二次側 ΔT 軸</span></td><td><span class="tag tag-controller">Partial — 4 / 80</span></td></tr>
+              <tr><td>§21.1</td><td><span class="en-text">CDU system-level validation</span><span class="zh-text">CDU 系統層級驗證</span></td><td><span class="en-text">Future work</span><span class="zh-text">未來工作</span></td><td><span class="tag tag-controller">Not implemented</span></td></tr>
+              <tr><td>§21.1.6</td><td><span class="en-text">Modbus functional test (pump, valve, flow, telemetry)</span><span class="zh-text">Modbus 功能測試（泵、閥、流量、遙測）</span></td><td><span class="en-text">Future work</span><span class="zh-text">未來工作</span></td><td><span class="tag tag-controller">Not implemented</span></td></tr>
+              <tr><td>§6.7 / §7.2.2</td><td><span class="en-text">Parallel CDU group control on a common header</span><span class="zh-text">共用集管之 CDU 並聯群組控制</span></td><td><span class="en-text">Future work</span><span class="zh-text">未來工作</span></td><td><span class="tag tag-controller">Not implemented</span></td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:11.5px;opacity:.7;margin:12px 0 0;">
+            <span class="en-text"><b>Future Work — deliberately not implemented in this version:</b> real Modbus/TCP communication and IPv4/IPv6 protocol stack; PLC integration and hardware-in-the-loop; the full 80-point automated validation engine; multi-CDU common-header hydraulic model with lead/lag and load sharing; full PID control; CFD; database, backend server and cloud platform.</span>
+            <span class="zh-text"><b>未來工作 — 本版本刻意未實作：</b>真實 Modbus/TCP 通訊與 IPv4/IPv6 協定堆疊；PLC 整合與硬體迴路測試；完整 80 點自動驗證引擎；含 lead/lag 與負載分擔之多台 CDU 共用集管水力模型；完整 PID 控制；CFD；資料庫、後端伺服器與雲端平台。</span>
+          </p>
+        </div>
+
+        <div class="section-label" style="margin-top:20px;">
+          <span class="en-text">Design Point Validation — §3.1</span>
+          <span class="zh-text">設計點驗證 — §3.1</span>
+        </div>
+        <div class="formula-box" style="border-color:var(--green);">
+          Q = 2,000 kW · ΔT = 15°C · DI water<br>
+          <span class="en-text">→ 115.0 m³/h = 506.3 GPM vs §3.1 spec 500 GPM ✔ deviation +1.3%</span>
+          <span class="zh-text">→ 115.0 m³/h = 506.3 GPM vs §3.1 規範 500 GPM ✔ 偏差 +1.3%</span>
+        </div>
+        <div class="formula-box" style="border-color:var(--yellow);">
+          <span class="en-text">HX design point: 2,150 kW @ 545 GPM → 2.3°C approach ✔ within ≤3°C target</span>
+          <span class="zh-text">熱交換器設計點：2,150 kW @ 545 GPM → 趨近溫度 2.3°C ✔ 符合 ≤3°C 目標</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="danfoss-badge">DANFOSS</div>
+  <p style="margin-top:10px;">
+    <span class="en-text">OCP Project Deschutes Specification-Anchored Digital Twin Research Prototype · Release v9.1, September 2026 · For internal and customer reference use · Values are engineering estimates<br>Software-level operating-condition checks only — this tool does not constitute OCP product compliance or certification.</span>
+    <span class="zh-text">基於 OCP Project Deschutes 規範之數位孿生研究原型 · v9.1 版，2026 年 9 月 · 供內部及客戶參考使用 · 數值為工程估算<br>僅提供軟體層級運轉條件檢查，不代表 OCP 產品合規或認證。</span>
+  </p>
+</footer>
+
+<script>
+// ─────────────────────────────────────────
+// CONTROL EFFECTS — modes drive the simulated telemetry
+// Controlled variable is held tight; the rest float.
+// ─────────────────────────────────────────
+const CTRL_EFFECT = {
+  // pump modes: which signal is regulated, and how the rest respond
+  dp:     { lock:'P-T02', loose:['F-M01','P-T01','S-P01','S-PP1'],
+            eEn:'ΔP held · flow floats with load', eZh:'壓差鎖定 · 流量隨負載浮動' },
+  flow:   { lock:'F-M01', loose:['P-T02','T-R01','S-P01','S-PP1'],
+            eEn:'Flow held at setpoint · ΔP floats', eZh:'流量鎖定於設定 · 壓差浮動' },
+  supply: { lock:'T-S01', loose:['F-M01','P-T02','S-P01','S-PP1'],
+            eEn:'Supply temp held · flow modulates', eZh:'供水溫度鎖定 · 流量調節' },
+  return: { lock:'T-R01', loose:['F-M01','P-T02','S-P01','S-PP1'],
+            eEn:'Return temp held · flow modulates', eZh:'回水溫度鎖定 · 流量調節' },
+  speed:  { lock:'S-P01', loose:['F-M01','P-T02','T-S01','T-R01'],
+            eEn:'Speed held · all process variables float', eZh:'轉速鎖定 · 所有製程變數浮動' },
+};
+const VALVE_EFFECT = {
+  approach: { lock:'A-TP1', loose:['F-M02','V-C01','T-S03'],
+              eEn:'Approach held at the §5.3 target · valve modulates', eZh:'趨近溫度鎖定於 §5.3 目標 · 閥門調節' },
+  opening:  { lock:'V-C01',  loose:['A-TP1','F-M02','T-S01','T-S03'],
+              eEn:'Valve position fixed — approach drifts with load', eZh:'閥位固定 — 趨近溫度隨負載漂移' },
+  secsup:   { lock:'T-S01',  loose:['A-TP1','F-M02','V-C01'],
+              eEn:'Secondary supply held · approach floats', eZh:'二次側供水鎖定 · 趨近溫度浮動' },
+};
+
+// baseline variance restored before each re-application
+const BASE_RANGE = {
+  'T-S01':0.8,'T-S02':0.8,'T-R02':1.2,'T-R01':1.0,'A-TP1':0.3,
+  'F-M01':0.55,'F-M02':0.55,'P-T01':0.15,'P-T02':0.1,
+  'E-M01':8,'E-M02':1.5,'E-M03':0.01,'Q-PH1':0.15,'Q-EC1':2,'L-Z01':0.3,'T-A01':0.5,
+  // ═══ OCP §7.2.1 — added in the baseline prototype ═══
+  'T-S03':0.6,'T-R03':0.9,
+  'P-M01':0.12,'P-M02':0.10,'P-M03':0.10,'P-M04':0.10,
+  'S-P01':35,'S-P02':35,'S-PP1':1.0,'S-PP2':1.0,
+  'E-P01':0.8,'E-P02':0.8,'V-C01':1.5,'T-M01':1.8,
+};
+
+const TIGHT = 0.12;   // regulated variable — near-constant
+const LOOSE = 4.0;    // unregulated — wide drift
+
+function applyControlEffects() {
+  if (typeof sensorBases === 'undefined') return;
+
+  // 1. reset every signal to its baseline variance
+  Object.keys(BASE_RANGE).forEach(id => {
+    if (sensorBases[id]) sensorBases[id].range = BASE_RANGE[id];
+  });
+
+  const p = CTRL_EFFECT[pumpMode], v = VALVE_EFFECT[valveMode];
+
+  // 2. tighten regulated signals, loosen the floating ones
+  [p, v].forEach(m => {
+    if (!m) return;
+    if (m.lock && sensorBases[m.lock]) sensorBases[m.lock].range = BASE_RANGE[m.lock] * TIGHT;
+    m.loose.forEach(id => { if (sensorBases[id]) sensorBases[id].range = BASE_RANGE[id] * LOOSE; });
+  });
+
+  // 3. N vs N+1 — losing a pump cuts hydraulic capability (§3.2 item 4, §5.4)
+  const set = (id, base, range) => {
+    if (!sensorBases[id]) return;
+    sensorBases[id].base = base;
+    if (range !== undefined) sensorBases[id].range = range;
+  };
+
+  // ═══ Hydraulic state derivation ═══
+  // froze P-T02, S-P01/02, S-PP1/2, E-P01/02, P-M01..P-M04, V-C01 and
+  // T-M01 at fixed numbers, so none of them responded to IT load or flow.
+  // They are now solved from the §5.1 fits at the flow the thermal model gives.
+  const qGpm     = Math.max(1, BASE_FLOW * M3H2GPM);        // secondary, per CDU
+  const dpMap    = pumpsOn ? DP_2PUMP : DP_1PUMP;
+  // §7.2.2: fixed-speed mode holds speed and lets dP float; every other mode
+  // regulates a process variable, so speed is solved to hold the dP window.
+  const pwm      = (pumpMode === 'speed')
+                     ? (pumpsOn ? 92 : 100)
+                     : PWM_FOR_DP(dpMap, DP_TARGET_PSI, qGpm);
+  const dpPsi    = DP_AT(dpMap, pwm, qGpm);
+  const dpBar    = parseFloat((dpPsi / PSI2BAR).toFixed(2));
+  const rpm      = Math.round(3600 * pwm / 100);
+  const pumpKW   = PUMP_KW_AT(pwm);
+  const motorC   = parseFloat((30 + 0.42 * pwm + (pumpsOn ? 0 : 8)).toFixed(1));
+
+  // primary / facility side — §5.1.3 fit at the facility flow
+  const qPrim    = Math.max(1, (sensorBases['F-M02'] ? sensorBases['F-M02'].base : BASE_FLOW) * M3H2GPM);
+  const dpPrimBar= parseFloat((DP_PRIMARY(qPrim) / PSI2BAR).toFixed(2));
+  // §6.3 modulating valve — opening tracks demand against the design point
+  const vPos     = parseFloat(Math.min(100, Math.max(5, 68 * qPrim / Q_DESIGN_GPM)).toFixed(1));
+
+  set('F-M01', BASE_FLOW);
+  set('T-R01', BASE_RETURN);
+  set('P-T02', dpBar);
+  set('P-M02', BASE_RWR);
+  set('P-M01', parseFloat((BASE_RWR + dpBar).toFixed(2)));
+  set('P-M04', BASE_PCWR);
+  set('P-M03', parseFloat((BASE_PCWR + dpPrimBar).toFixed(2)));
+  set('V-C01', vPos);
+  set('T-M01', motorC);
+  // discrete alarm state derived from the measured motor temperature (§7.2.1)
+  const OT_TRIP = 105;
+  set('A-OT1', motorC >= OT_TRIP ? 1 : 0, 0);
+  set('A-OT2', (pumpsOn && motorC >= OT_TRIP) ? 1 : 0, 0);
+  // §3.1 power consumption is the CDU's own electrical draw: pumps on drives.
+  // reported 12 % of IT load here, which is plant cooling, not the CDU.
+  set('E-M02', parseFloat(((pumpsOn ? 2 : 1) * pumpKW).toFixed(1)));
+
+  if (!pumpsOn) {
+    // ── N operation: pump 2 stopped, pump 1 carries the duty ──
+    // §5.1.2 at 500 GPM and 100 % PWM gives 89.3 psi — still inside the §3.1
+    // window. §6.1 rates the pump at 500 GPM / 112 psi on its own. Losing a
+    // pump holds the design point but removes all speed reserve; the window is
+    // left above 555 GPM, only 11 % above design flow.
+    set('S-P02', 0, 0);   set('S-PP2', 0, 0);   set('E-P02', 0, 0);
+    set('S-P01', rpm, 20); set('S-PP1', pwm, 0.3); set('E-P01', pumpKW, 0.3);
+  } else {
+    // ── N+1: both pumps at the solved speed, load shared ──
+    set('S-P01', rpm, 35);  set('S-P02', rpm, 35);
+    set('S-PP1', pwm, 1.0); set('S-PP2', pwm, 1.0);
+    set('E-P01', pumpKW, 0.3); set('E-P02', pumpKW, 0.3);
+  }
+
+  markControlledCards(p, v);
+  updateEffectLabels(p, v);
+}
+
+// ═══ OCP §5.1 polynomial hydraulic model ═══
+// §5.1.1 two-pump (N+1) and §5.1.2 one-pump (N) available dP vs flow, PG25,
+// 2-pass HX. Q in GPM, result in psi. Source: OCP Deschutes v1.0 Figures
+// 5.1.1 / 5.1.2 (curve equations printed in the figure legends).
+const DP_2PUMP = {           // [a0, a1, a2] by PWM %
+  100: [119,  0.0211,  -9.34e-5],
+   95: [105,  0.0171,  -8.66e-5],
+   90: [94.1, 0.0148,  -8.41e-5],
+   83: [83,   0.0144,  -9.05e-5],
+   80: [74.4, 0.0107,  -7.96e-5],
+   75: [65.4, 8.83e-3, -7.75e-5],
+   66: [53.2, 0.0103,  -9.07e-5],
+};
+const DP_1PUMP = {
+  100: [120,  0.0372, -1.97e-4],
+   95: [105,  0.0386, -1.84e-4],
+   90: [94.1, 0.0341, -1.74e-4],
+   83: [83,   0.0348, -2.03e-4],
+   75: [65.4, 0.0222, -1.48e-4],
+};
+const POLY = (c, q) => c[0] + c[1] * q + c[2] * q * q;
+// linear interpolation between adjacent published speed curves
+function DP_AT(map, pwm, q) {
+  const keys = Object.keys(map).map(Number).sort((a, b) => a - b);
+  if (pwm <= keys[0])                 return POLY(map[keys[0]], q);
+  if (pwm >= keys[keys.length - 1])   return POLY(map[keys[keys.length - 1]], q);
+  for (let i = 0; i < keys.length - 1; i++) {
+    const lo = keys[i], hi = keys[i + 1];
+    if (pwm >= lo && pwm <= hi) {
+      const a = POLY(map[lo], q), b = POLY(map[hi], q);
+      return a + (pwm - lo) / (hi - lo) * (b - a);
+    }
+  }
+  return POLY(map[keys[keys.length - 1]], q);
+}
+const DP_1PUMP_100 = (q) => POLY(DP_1PUMP[100], q);
+// ═══ Pump speed derivation — inversion of the §5.1 fit ═══
+// §7.2.2 makes fixed differential pressure the DEFAULT pump control mode, so
+// speed is an OUTPUT: it is whatever holds the target dP at the flow the
+// thermal model demands. the baseline prototype held speed and dP as independent constants, so
+// neither responded to load. PWM_FOR_DP solves the fit by bisection.
+function PWM_FOR_DP(map, targetPsi, qGpm) {
+  const keys = Object.keys(map).map(Number).sort((a, b) => a - b);
+  const lo = keys[0], hi = keys[keys.length - 1];
+  if (DP_AT(map, hi, qGpm) <= targetPsi) return hi;   // cannot reach — flat out
+  if (DP_AT(map, lo, qGpm) >= targetPsi) return lo;   // more than enough
+  let a = lo, b = hi;
+  for (let i = 0; i < 40; i++) {
+    const m = (a + b) / 2;
+    if (DP_AT(map, m, qGpm) < targetPsi) a = m; else b = m;
+  }
+  return parseFloat(((a + b) / 2).toFixed(1));
+}
+// §5.1.3 primary (facility) side, water, 100 % control valve. Q in GPM -> psi
+const DP_PRIMARY = (q) => 0.0785 + 1.58e-4 * q + 6.06e-5 * q * q;
+const PSI2BAR = 14.5038;
+const M3H2GPM = 4.4029;
+const DP_TARGET_PSI = 85;            // mid of the §3.1 80–90 psi window
+const Q_DESIGN_GPM  = 500;           // §3.1 design point
+// §6.1 nameplate 37 kW at 100 %; affinity law P ∝ n³
+const PUMP_KW_AT = (pwm) => parseFloat((37 * Math.pow(pwm / 100, 3)).toFixed(1));
+
+// remember nominal values so N+1 restore is exact
+let BASE_FLOW = 18, BASE_RETURN = 45, BASE_COOLPWR = 24;
+// ═══ Design note — nominals for the §7.2.1 signals added above ═══
+let BASE_DP = 5.86, BASE_PUMPKW = 28.8, BASE_RWS = 8.36, BASE_RWR = 2.5, BASE_PCWR = 2.9;
+function captureNominal() {
+  if (typeof sensorBases === 'undefined') return;
+  BASE_FLOW    = sensorBases['F-M01'] ? sensorBases['F-M01'].base : 18;
+  BASE_RETURN  = sensorBases['T-R01'] ? sensorBases['T-R01'].base : 45;
+  BASE_COOLPWR = sensorBases['E-M02'] ? sensorBases['E-M02'].base : 24;
+  // Note: only the STATIC references are captured. Anything applyControlEffects
+  // derives (dP, speed, pump power, RWS) must not be captured from its own
+  // output, or the baseline drifts every time a control mode is changed.
+  if (typeof pumpsOn === 'undefined' || pumpsOn) {
+    BASE_RWR  = sensorBases['P-M02'] ? sensorBases['P-M02'].base : 2.5;
+    BASE_PCWR = sensorBases['P-M04'] ? sensorBases['P-M04'].base : 2.9;
+  }
+}
+
+function markControlledCards(p, v) {
+  const locks = [p && p.lock, v && v.lock].filter(Boolean);
+  const floats = [...(p ? p.loose : []), ...(v ? v.loose : [])];
+  document.querySelectorAll('.sensor-card').forEach(c => {
+    const id = c.id.replace('card-','');
+    c.classList.toggle('locked',   locks.includes(id));
+    c.classList.toggle('floating', !locks.includes(id) && floats.includes(id));
+  });
+}
+
+function updateEffectLabels(p, v) {
+  // replace, never append — otherwise labels stack on every call
+  const put = (hostId, m) => {
+    const host = document.getElementById(hostId);
+    if (!host || !m) return;
+    host.querySelectorAll('.ctrl-effect').forEach(n => n.remove());
+    const d = document.createElement('div');
+    d.className = 'ctrl-effect';
+    d.innerHTML = `▸ <span class="en-text">${m.eEn}</span><span class="zh-text">${m.eZh}</span>`;
+    host.appendChild(d);
+  };
+  put('pump-state',  p);
+  put('valve-state', v);
+}
+
+// ─────────────────────────────────────────
+// OCP §7.2.2 — CONTROLLABLE PARAMETERS VIA PLC
+// Pump speed: DEFAULT fixed pressure drop control
+// Valve:      DEFAULT approach temperature control
+// ─────────────────────────────────────────
+let pumpMode  = 'dp';        // §7.2.2 DEFAULT
+let valveMode = 'approach';  // §7.2.2 DEFAULT
+let pumpsOn   = true;
+
+const PUMP_MODES = {
+  dp:     { en:'Fixed pressure drop control',  zh:'固定壓差控制',
+            spEn:'ΔP setpoint 85 psi / 5.86 bar', spZh:'壓差設定 85 psi / 5.86 bar',
+            noteEn:'Pump speed is solved from the OCP §5.1 hydraulic curves to hold this differential. The 85 psi setpoint is an author-selected midpoint within the OCP §3.1 IT dP range of 80–90 psi; the specification does not prescribe a setpoint.',
+            noteZh:'泵速由 OCP §5.1 水力曲線求解以維持此壓差。85 psi 為作者於 OCP §3.1 IT 壓差範圍 80–90 psi 中選定的中間值，規範並未指定設定點。', dflt:true },
+  flow:   { en:'Fixed flow',                   zh:'固定流量',
+            spEn:'Flow setpoint 500 GPM (§3.1)', spZh:'流量設定 500 GPM (§3.1)',
+            noteEn:'Pump speed modulates to hold constant volumetric flow regardless of load. Represented as a software behavioural simulation — only the fixed-ΔP mode is solved directly from the OCP §5.1 hydraulic curves.',
+            noteZh:'泵速調節以維持固定體積流量，不隨負載變動。 本模式以軟體行為模擬呈現，僅固定壓差模式直接由 OCP §5.1 水力曲線求解。' },
+  supply: { en:'Fixed supply temperature',     zh:'固定供水溫度',
+            spEn:'Supply setpoint 30.0 °C',    spZh:'供水設定 30.0 °C',
+            noteEn:'Pump speed modulates to hold secondary supply temperature constant. Represented as a software behavioural simulation — only the fixed-ΔP mode is solved directly from the OCP §5.1 hydraulic curves.',
+            noteZh:'泵速調節以維持二次側供水溫度固定。 本模式以軟體行為模擬呈現，僅固定壓差模式直接由 OCP §5.1 水力曲線求解。' },
+  return: { en:'Fixed return temperature',     zh:'固定回水溫度',
+            spEn:'Return setpoint 45.0 °C',    spZh:'回水設定 45.0 °C',
+            noteEn:'Pump speed modulates to hold secondary return temperature constant. Represented as a software behavioural simulation — only the fixed-ΔP mode is solved directly from the OCP §5.1 hydraulic curves.',
+            noteZh:'泵速調節以維持二次側回水溫度固定。 本模式以軟體行為模擬呈現，僅固定壓差模式直接由 OCP §5.1 水力曲線求解。' },
+  speed:  { en:'Fixed speed',                  zh:'固定轉速',
+            spEn:'Speed setpoint 92 % (approx. 3,310 RPM)', spZh:'轉速設定 92 % (約 3,310 RPM)',
+            noteEn:'Open-loop. Pump runs at commanded speed; available ΔP follows the §5.1 curve at the prevailing flow. 92 % is the speed the §5.1.1 curve requires to reach 85 psi at the 500 GPM design point.',
+            noteZh:'開迴路。泵以指定轉速運轉，可用壓差依 §5.1 曲線隨流量變動。92 % 為 §5.1.1 曲線在 500 GPM 設計點達到 85 psi 所需的轉速。' },
+};
+
+const VALVE_MODES = {
+  approach: { en:'Approach temperature control', zh:'趨近溫度控制',
+              spEn:'Approach setpoint 3.0 °C (§5.3 target ≤3 °C)',
+              spZh:'趨近溫度設定 3.0 °C (§5.3 目標 ≤3 °C)',
+              noteEn:'Valve opening modulates to hold ΔT_approach = T_sec.supply,cold − T_prim.supply,cold. Simplified control-law simulation — no closed-loop controller; hardware validation pending.',
+              noteZh:'閥開度調節以維持 ΔT_approach = 二次側供水(冷) − 一次側供水(冷)。本模式為簡化控制律模擬，未實作閉迴路控制器，硬體驗證待辦。', dflt:true },
+  opening:  { en:'Fixed opening',                zh:'固定開度',
+              spEn:'Valve position 68 %',        spZh:'閥位 68 %',
+              noteEn:'Open-loop. Valve held at commanded position; approach temperature floats. Simplified control-law simulation — hardware validation pending.',
+              noteZh:'開迴路。閥維持指定開度，趨近溫度隨之浮動。本模式為簡化控制律模擬，硬體驗證待辦。' },
+  secsup:   { en:'Fixed secondary supply temperature', zh:'固定二次側供水溫度',
+              spEn:'Secondary supply setpoint 30.0 °C', spZh:'二次側供水設定 30.0 °C',
+              noteEn:'Valve opening modulates to hold secondary supply temperature constant.',
+              noteZh:'閥開度調節以維持二次側供水溫度固定。' },
+};
+
+function renderCtrlState() {
+  const p = PUMP_MODES[pumpMode], v = VALVE_MODES[valveMode];
+  const ps = document.getElementById('pump-state');
+  const vs = document.getElementById('valve-state');
+  if (ps) ps.innerHTML =
+    `<b><span class="en-text">ACTIVE: ${p.en}</span><span class="zh-text">啟用中：${p.zh}</span></b><br>` +
+    `<span class="sp"><span class="en-text">${p.spEn}</span><span class="zh-text">${p.spZh}</span></span><br>` +
+    `<span style="color:var(--muted);"><span class="en-text">${p.noteEn}</span><span class="zh-text">${p.noteZh}</span></span>`;
+  if (vs) vs.innerHTML =
+    `<b><span class="en-text">ACTIVE: ${v.en}</span><span class="zh-text">啟用中：${v.zh}</span></b><br>` +
+    `<span class="sp"><span class="en-text">${v.spEn}</span><span class="zh-text">${v.spZh}</span></span><br>` +
+    `<span style="color:var(--muted);"><span class="en-text">${v.noteEn}</span><span class="zh-text">${v.noteZh}</span></span>`;
+}
+
+function setPumpMode(mode) {
+  pumpMode = mode;
+  document.querySelectorAll('[data-pump]').forEach(b =>
+    b.classList.toggle('active', b.dataset.pump === mode));
+  renderCtrlState();
+  applyControlEffects();
+  if (typeof updateSensors === 'function') updateSensors();
+  const p = PUMP_MODES[mode];
+  showToast('⚙ PUMP CONTROL — §7.2.2', '⚙ 泵速控制 — §7.2.2',
+    `${p.en} · ${p.spEn}`, `${p.zh} · ${p.spZh}`);
+  logCtrl(`Pump control mode → ${p.en}`, `泵速控制模式 → ${p.zh}`);
+}
+
+function setValveMode(mode) {
+  valveMode = mode;
+  document.querySelectorAll('[data-valve]').forEach(b =>
+    b.classList.toggle('active', b.dataset.valve === mode));
+  renderCtrlState();
+  applyControlEffects();
+  if (typeof updateSensors === 'function') updateSensors();
+  const v = VALVE_MODES[mode];
+  showToast('⚙ VALVE CONTROL — §7.2.2', '⚙ 閥控制 — §7.2.2',
+    `${v.en} · ${v.spEn}`, `${v.zh} · ${v.spZh}`);
+  logCtrl(`Valve control mode → ${v.en}`, `閥控制模式 → ${v.zh}`);
+}
+
+function togglePump() {
+  pumpsOn = !pumpsOn;
+  const el = document.getElementById('pump-toggle');
+  const lb = document.getElementById('pump-toggle-label');
+  if (el) el.classList.toggle('off', !pumpsOn);
+  if (lb) lb.textContent = pumpsOn
+    ? 'PUMP 1 + PUMP 2 (N+1) — ENABLED'
+    : 'PUMP 2 DISABLED — N OPERATION (§3.2 item 4)';
+  applyControlEffects();
+  if (typeof updateSensors === 'function') updateSensors();
+  showToast(pumpsOn ? '⚙ PUMPS ENABLED' : '⚠ PUMP DISABLED',
+            pumpsOn ? '⚙ 泵浦已啟用'    : '⚠ 泵浦已停用',
+            pumpsOn ? 'N+1 redundancy active — both pumps running'
+                    : 'Running N (single pump) — redundancy lost per §3.2 item 4',
+            pumpsOn ? 'N+1 冗餘運行中 — 雙泵運轉'
+                    : '單泵運行 — 依 §3.2 第 4 項已失去冗餘');
+  logCtrl(pumpsOn ? 'Pumps enabled — N+1 restored' : 'Pump 2 disabled — N operation',
+          pumpsOn ? '泵浦啟用 — N+1 已恢復'        : '泵浦 2 停用 — 單泵運行');
+}
+
+function logCtrl(en, zh) {
+  const log = document.getElementById('event-log');
+  if (!log) return;
+  const t = new Date().toLocaleTimeString('en-GB');
+  const e = document.createElement('div');
+  e.className = 'log-entry';
+  e.innerHTML = `<span class="log-time">${t}</span><span class="log-ok">` +
+                `<span class="en-text">⚙ ${en}</span><span class="zh-text">⚙ ${zh}</span></span>`;
+  log.insertBefore(e, log.firstChild);
+  while (log.children.length > 12) log.removeChild(log.lastChild);
+}
+
+// ─────────────────────────────────────────
+// OCP §20.4 (Table 20.2.1) — HX THERMAL-HYDRAULIC TEST MATRIX
+// Secondary side water dT: 10 / 15 / 20 / 25 °C
+// ─────────────────────────────────────────
+function setTestDT(dt) {
+  const tin  = parseFloat(document.getElementById('temp_in').value) || 30;
+  const tout = tin + dt;
+  if (tout > 55) {   // §3.1 operating liquid temperature 18–55 °C
+    showToast('⚠ OUTSIDE §3.1 WINDOW', '⚠ 超出 §3.1 操作窗',
+      `Return ${tout.toFixed(1)} °C exceeds the 18–55 °C operating range`,
+      `回水 ${tout.toFixed(1)} °C 超出 18–55 °C 操作範圍`);
+  }
+  document.getElementById('temp_out').value = tout;
+  document.querySelectorAll('[data-dt]').forEach(b =>
+    b.classList.toggle('active', parseFloat(b.dataset.dt) === dt));
+  calculate(true);
+  const cool = document.getElementById('coolant_type').value === 'water' ? 'DI water' : 'PG25';
+  showToast('§20.4 TEST POINT', '§20.4 測試點',
+    `Secondary ΔT = ${dt} °C · ${tin}→${tout} °C · ${cool}`,
+    `二次側 ΔT = ${dt} °C · ${tin}→${tout} °C · ${cool}`);
+}
+
+// ─────────────────────────────────────────
+// THEME TOGGLE (dark / light)
+// ─────────────────────────────────────────
+function applyTheme(mode) {
+  const light = mode === 'light';
+  document.body.classList.toggle('theme-light', light);
+  const icon  = document.getElementById('theme-icon');
+  const label = document.getElementById('theme-label');
+  if (icon)  icon.textContent  = light ? '☾' : '☀';
+  if (label) label.textContent = light ? 'DARK' : 'LIGHT';
+
+  // repaint charts so gridlines match the new theme
+  if (typeof Chart !== 'undefined' && (typeof tempChart !== 'undefined')) {
+    const grid = light ? '#E4E6E8' : '#2a2a2a';
+    const tick = light ? '#6B7280' : '#888';
+    [tempChart, flowChart].forEach(c => {
+      if (!c) return;
+      ['x','y'].forEach(ax => {
+        c.options.scales[ax].grid.color = grid;
+        c.options.scales[ax].ticks.color = tick;
+      });
+      c.update('none');
+    });
+  }
+}
+
+function toggleTheme() {
+  const isLight = document.body.classList.contains('theme-light');
+  applyTheme(isLight ? 'dark' : 'light');
+}
+
+// ─────────────────────────────────────────
+// LANGUAGE TOGGLE
+// ─────────────────────────────────────────
+function setLang(lang) {
+  document.body.className = 'lang-' + lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+}
+
+// ─────────────────────────────────────────
+// TAB SWITCHING
+// ─────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─────────────────────────────────────────
+// COOLANT PROPERTIES
+// ─────────────────────────────────────────
+const coolantProps = {
+  water:    { cp: 4.182, rho: 998 },
+  glycol25: { cp: 3.8,   rho: 1040 },
+  glycol40: { cp: 3.5,   rho: 1055 }
+};
+
+// ─────────────────────────────────────────
+// CDU CALCULATOR
+// ─────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// — INPUT VALIDATION
+// The number inputs already carry min / max in the markup, but those
+// attributes are only enforced by a form submit. This file reads values
+// with parseFloat directly, so every bound was decorative: a CDU count of
+// 10000, a load of 999999 kW, a blank field (NaN) or ΔT = 0 (a division by
+// zero returning Infinity) all passed straight through to the model.
+// readNum reads the element's OWN min / max attributes, so the bounds stay
+// declared in one place, and writes the clamped value back so the user sees
+// what was actually used.
+// ═══════════════════════════════════════════════════════════
+function readNum(id, fallback, isInt) {
+  const el = document.getElementById(id);
+  if (!el) return fallback;
+  let v = isInt ? parseInt(el.value, 10) : parseFloat(el.value);
+  if (!isFinite(v)) v = fallback;
+  const lo = parseFloat(el.getAttribute('min'));
+  const hi = parseFloat(el.getAttribute('max'));
+  if (isFinite(lo) && v < lo) v = lo;
+  if (isFinite(hi) && v > hi) v = hi;
+  if (isInt) v = Math.round(v);
+  if (String(v) !== String(el.value)) el.value = v;   // show the clamp
+  return v;
+}
+
+// ═══ OCP operating-condition checks — a clause set, not a single test ═══
+// declared the design "OCP COMPLIANT" on a single condition, approach
+// ≤ 3 °C, which is independent of load, flow and unit count. Every clause
+// below carries a numeric window the specification actually states.
+function checkOCP(c) {
+  const fails = [];
+  const add = (en, zh) => fails.push({ en, zh });
+  // — §5.2 approves DI-water based formulations and PG25 only. PG40 is
+  // retained as an engineering scenario but must not reach an OCP verdict.
+  if (c.coolant && !['water', 'glycol25'].includes(c.coolant))
+    add('§5.2 — coolant is not an approved Project Deschutes fluid (NON-OCP ENGINEERING SCENARIO)',
+        '§5.2 — 冷卻液非 Project Deschutes 認可流體（非 OCP 工程情境）');
+  if (!(c.dt > 0))
+    add('Secondary ΔT must be positive — return above supply',
+        '二次側 ΔT 必須為正 — 回水須高於供水');
+  if (!(c.chwDt > 0))
+    add('Facility ΔT must be positive — return above supply',
+        '一次側 ΔT 必須為正 — 回水須高於供水');
+  if (c.perCDUheat > 2000)
+    add(`§3.1 — ${c.perCDUheat.toFixed(0)} kW per CDU exceeds the 2,000 kW rating`,
+        `§3.1 — 每台 CDU ${c.perCDUheat.toFixed(0)} kW 超過 2,000 kW 額定`);
+  if (isFinite(c.perCDUgpm) && (c.perCDUgpm < 150 || c.perCDUgpm > 650))
+    add(`§5.1 — ${c.perCDUgpm.toFixed(0)} GPM per CDU is outside the characterised range 150–650 GPM`,
+        `§5.1 — 每台 CDU ${c.perCDUgpm.toFixed(0)} GPM 超出已定義曲線範圍 150–650 GPM`);
+  if (c.temp_in < 18 || c.temp_in > 55 || c.temp_out < 18 || c.temp_out > 55)
+    add('§5 — secondary loop temperature outside the 18–55 °C operating window',
+        '§5 — 二次側水溫超出 18–55 °C 操作窗');
+  if (c.approach > 3)
+    add(`§5.3 — approach ${c.approach.toFixed(1)} °C exceeds the 3 °C target`,
+        `§5.3 — 趨近溫度 ${c.approach.toFixed(1)} °C 超過 3 °C 目標`);
+  // The model computes these three quantities but earlier builds did not test
+  // them, so a modelled state outside a specified window could still pass.
+  if (isFinite(c.itDp) && (c.itDp < 80 || c.itDp > 90))
+    add(`§3.1 — IT differential pressure ${c.itDp.toFixed(1)} psi is outside the 80–90 psi window`,
+        `§3.1 — IT 側壓差 ${c.itDp.toFixed(1)} psi 超出 80–90 psi 窗`);
+  if (isFinite(c.facDp) && (c.facDp < 15 || c.facDp > 30))
+    add(`§3.1 — facility differential pressure ${c.facDp.toFixed(1)} psi is outside the 15–30 psi window`,
+        `§3.1 — 一次側壓差 ${c.facDp.toFixed(1)} psi 超出 15–30 psi 窗`);
+  if (isFinite(c.maxPsig) && (c.maxPsig < 0 || c.maxPsig > 130))
+    add(`§3.1 — maximum gauge pressure ${c.maxPsig.toFixed(0)} psig is outside the 0–130 psig range`,
+        `§3.1 — 最高錶壓 ${c.maxPsig.toFixed(0)} psig 超出 0–130 psig 範圍`);
+  return fails;
+}
+
+function calculate(withFeedback) {
+  // Note: bounded reads — see readNum above
+  const it_power    = readNum('it_power',  2000, false);
+  const cdu_count   = readNum('cdu_count', 1,    true);
+  const pue         = readNum('pue',       1.0,  false);
+  const temp_in     = readNum('temp_in',   30,   false);
+  const temp_out    = readNum('temp_out',  45,   false);
+  const chw_in      = readNum('chw_in',    27,   false);
+  const chw_out     = readNum('chw_out',   42,   false);
+  const coolant     = document.getElementById('coolant_type').value;
+
+  // Note: fall back to the §5.2 default rather than throwing on an
+  // unrecognised selection — an undefined props crashed calculate() outright
+  const props = coolantProps[coolant] || coolantProps.water;
+  const cp  = props.cp;
+  const rho = props.rho;
+
+  // Correction (audit finding M-08):: a CDU rejects IT heat plus pump work, not facility
+  // overhead. the baseline prototype multiplied IT power by PUE, inflating computed flow at any
+  // PUE above 1.0. The input is retained for the energy-ratio display only.
+  const totalHeat = it_power * cdu_count;        // kW — IT thermal load
+  const dt        = temp_out - temp_in;           // °C
+  const massFlow  = (totalHeat * 1000) / (cp * 1000 * dt);  // kg/s
+  const volFlow   = (massFlow / rho) * 3600;      // m³/h
+  const lpm       = volFlow * 1000 / 60;          // L/min
+
+  const chwDt   = chw_out - chw_in;
+  // Correction (audit finding C-01):: mass flow must be divided by
+  // density before it is reported as a volume flow. the baseline prototype omitted /rho here
+  // while the secondary circuit applied it, overstating facility flow ~998x.
+  const chwMass = (totalHeat * 1000) / (4.182 * 1000 * chwDt);   // kg/s
+  const chwFlow = (chwMass / 998) * 3600;                        // m³/h
+
+  // Update results
+  document.getElementById('r-heat').textContent = totalHeat.toFixed(1);
+  document.getElementById('r-dt').textContent   = dt.toFixed(1);
+  document.getElementById('r-mass').textContent = massFlow.toFixed(2);
+  document.getElementById('r-vol').textContent  = volFlow.toFixed(2);
+  document.getElementById('r-lpm').textContent  = lpm.toFixed(1);
+  document.getElementById('r-chw').textContent  = chwFlow.toFixed(2);
+
+  // ── OCP Deschutes: approach temperature (secondary supply − primary supply) ──
+  const approach = temp_in - chw_in;
+  const apEl = document.getElementById('r-approach');
+  apEl.textContent = approach.toFixed(1);
+  apEl.style.color = approach <= 3 ? 'var(--green)' : (approach <= 5 ? 'var(--yellow)' : 'var(--accent)');
+
+  // ── ASHRAE Liquid Cooling W-Class (by facility supply temp) ──
+  let wclass = 'W+';
+  if (chw_in <= 17) wclass = 'W17';
+  else if (chw_in <= 27) wclass = 'W27';
+  else if (chw_in <= 32) wclass = 'W32';
+  else if (chw_in <= 40) wclass = 'W40';
+  else if (chw_in <= 45) wclass = 'W45';
+  document.getElementById('r-wclass').textContent = wclass;
+
+  // ═══ Design note — OCP conformance check against the clause set ═══
+  const perCDUgpm = cdu_count > 0 ? (volFlow / cdu_count) * 4.4029 : NaN;
+  const ocpFails = checkOCP({
+    dt, chwDt, approach, temp_in, temp_out,
+    perCDUheat: it_power,
+    perCDUgpm:  perCDUgpm,
+    coolant:    coolant,
+    // hydraulic state as the monitor currently holds it (§3.1 windows)
+    itDp:       sensorBases['P-T02'] ? sensorBases['P-T02'].base * 14.5038 : NaN,
+    facDp:      (sensorBases['P-M03'] && sensorBases['P-M04'])
+                  ? (sensorBases['P-M03'].base - sensorBases['P-M04'].base) * 14.5038 : NaN,
+    maxPsig:    sensorBases['P-M01'] ? (sensorBases['P-M01'].base - 1.01325) * 14.5038 : NaN
+  });
+  // — the hydraulic polynomials of §5.1 are published for PG25 only.
+  const fluidBasisEn = coolant === 'glycol25'
+    ? 'Hydraulic model basis: OCP §5.1 PG25 published curves.'
+    : 'Hydraulic model basis: OCP §5.1 PG25 published curves — approximate hydraulic reference only for this fluid.';
+  const fluidBasisZh = coolant === 'glycol25'
+    ? '水力模型基礎：OCP §5.1 PG25 公布曲線。'
+    : '水力模型基礎：OCP §5.1 PG25 公布曲線 — 對此流體僅為近似水力參考。';
+  const disclaimerEn = 'Software-level operating-condition check only. This does not constitute full OCP product compliance or certification.';
+  const disclaimerZh = '此結果僅代表軟體層級運轉條件檢查，不代表完整 OCP 產品合規或認證。';
+  const ocpOK = ocpFails.length === 0;
+
+  const alertBox = document.getElementById('alert-box');
+  alertBox.style.display = 'block';
+  if (!ocpOK) {
+    alertBox.className = 'alert';
+    alertBox.innerHTML =
+      '<span class="en-text">⚠️ <b>' + ocpFails.length + ' OCP operating check' +
+        (ocpFails.length > 1 ? 's' : '') + ' failed</b><br>' +
+        ocpFails.map(f => '• ' + f.en).join('<br>') +
+        '<br><small>' + fluidBasisEn + '<br>' + disclaimerEn + '</small></span>' +
+      '<span class="zh-text">⚠️ <b>未通過 ' + ocpFails.length +
+        ' 項 OCP 運轉條件檢查</b><br>' +
+        ocpFails.map(f => '• ' + f.zh).join('<br>') +
+        '<br><small>' + fluidBasisZh + '<br>' + disclaimerZh + '</small></span>';
+  } else if (dt < 10) {
+    alertBox.className = 'alert info';
+    alertBox.innerHTML =
+      '<span class="en-text">ℹ️ ΔT ' + dt.toFixed(1) +
+        ' °C — below the 10 °C floor of the §20.4 test matrix. High flow demand; check pipe sizing and valve Kvs.</span>' +
+      '<span class="zh-text">ℹ️ ΔT ' + dt.toFixed(1) +
+        ' °C — 低於 §20.4 測試矩陣下限 10 °C。流量需求偏高,請檢查管徑與閥門 Kvs。</span>';
+  } else if (dt > 25) {
+    alertBox.className = 'alert info';
+    alertBox.innerHTML =
+      '<span class="en-text">ℹ️ ΔT ' + dt.toFixed(1) +
+        ' °C — above the 25 °C ceiling of the §20.4 test matrix. Verify the return stays inside the §5 window (18–55 °C).</span>' +
+      '<span class="zh-text">ℹ️ ΔT ' + dt.toFixed(1) +
+        ' °C — 高於 §20.4 測試矩陣上限 25 °C。請確認回水仍在 §5 操作窗 (18–55 °C) 內。</span>';
+  } else {
+    alertBox.className = 'alert ok';
+    const dev = ((perCDUgpm - 500) / 500 * 100);
+    alertBox.innerHTML =
+      '<span class="en-text">✔ <b>OCP OPERATING CHECKS PASSED</b><br>' +
+        '• OCP reference design point: 500 GPM per CDU (§3.1)<br>' +
+        '• Thermodynamic calculated flow: ' + perCDUgpm.toFixed(1) + ' GPM per CDU<br>' +
+        '• Deviation from design point: ' + (dev >= 0 ? '+' : '') + dev.toFixed(1) + ' %<br>' +
+        '• Hydraulic model characterized range: approx. 150–650 GPM (this is the model validity domain, not an OCP compliant-flow range)<br>' +
+        '• ' + it_power.toFixed(0) + ' kW per CDU · approach ' + approach.toFixed(1) +
+        ' °C · ΔT ' + dt.toFixed(1) + ' °C<br>' +
+        '<small>' + fluidBasisEn + '<br>' + disclaimerEn + '</small></span>' +
+      '<span class="zh-text">✔ <b>OCP 運轉條件檢查通過</b><br>' +
+        '• OCP 參考設計點：每台 CDU 500 GPM (§3.1)<br>' +
+        '• 熱力學計算流量：每台 CDU ' + perCDUgpm.toFixed(1) + ' GPM<br>' +
+        '• 與設計點偏差：' + (dev >= 0 ? '+' : '') + dev.toFixed(1) + ' %<br>' +
+        '• 水力模型已定義範圍：約 150–650 GPM（此為模型有效域，非 OCP 合規流量範圍）<br>' +
+        '• 每台 CDU ' + it_power.toFixed(0) + ' kW · 趨近溫度 ' + approach.toFixed(1) +
+        ' °C · ΔT ' + dt.toFixed(1) + ' °C<br>' +
+        '<small>' + fluidBasisZh + '<br>' + disclaimerZh + '</small></span>';
+  }
+
+  // Illustrative component mapping
+  // Note: component sizing must use the PER-CDU flow, not the plant total
+  const products = buildProductList(totalHeat, volFlow, cdu_count);
+  renderProductTable('product-tbody', products);
+
+  document.getElementById('results-panel').classList.add('visible');
+
+  // ── Button + result feedback ──
+  if (withFeedback) {
+    flashResults();
+    btnFeedback(document.getElementById('btn-calc'), '✔ CALCULATED', '✔ 計算完成');
+    // Note: verdict comes from the full clause set, not from approach alone
+    showToast(
+      ocpOK ? '✔ OCP OPERATING CHECKS PASSED' : `⚠ ${ocpFails.length} OCP OPERATING CHECK${ocpFails.length > 1 ? 'S' : ''} FAILED`,
+      ocpOK ? '✔ OCP 運轉條件檢查通過'          : `⚠ 未通過 ${ocpFails.length} 項 OCP 運轉條件檢查`,
+      ocpOK
+        ? `${cdu_count} CDU × ${it_power.toFixed(0)} kW · ${perCDUgpm.toFixed(0)} GPM per CDU · approach ${approach.toFixed(1)}°C · ${wclass}`
+        : ocpFails.map(f => f.en).join(' · '),
+      ocpOK
+        ? `${cdu_count} 台 CDU × ${it_power.toFixed(0)} kW · 每台 ${perCDUgpm.toFixed(0)} GPM · 趨近溫度 ${approach.toFixed(1)}°C · ${wclass}`
+        : ocpFails.map(f => f.zh).join(' · ')
+    );
+  }
+
+  // ── Sync to Real-time Monitor ──
+  syncMonitorFromCDU({
+    temp_in:   temp_in,
+    temp_out:  temp_out,
+    totalHeat: totalHeat,
+    volFlow:   volFlow,
+    lpm:       lpm,
+    chwFlow:   chwFlow,
+    dt:        dt,
+    chw_in:    chw_in,      // §7.2.1 PCWS manifold temp
+    chw_out:   chw_out,     // §7.2.1 PCWR manifold temp
+    approach:  approach,    // §7.2.2 ΔT_approach, drives A-TP1
+    pue:       pue,         // — facility energy ratio, drives E-M03
+    cduCount:  cdu_count    // — monitor is per-unit, totals are per-plant
+  });
+}
+
+// ─────────────────────────────────────────
+// BUTTON FEEDBACK / UX
+// ─────────────────────────────────────────
+function btnRipple(ev) {
+  const btn = ev.currentTarget || ev.target.closest('.btn');
+  if (!btn) return;
+  const r = document.createElement('span');
+  r.className = 'ripple';
+  const rect = btn.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  r.style.width = r.style.height = size + 'px';
+  r.style.left = (ev.clientX - rect.left - size/2) + 'px';
+  r.style.top  = (ev.clientY - rect.top  - size/2) + 'px';
+  btn.appendChild(r);
+  setTimeout(() => r.remove(), 600);
+}
+
+function btnFeedback(btn, doneLabelEn, doneLabelZh) {
+  if (!btn) return;
+  btn.classList.add('btn-flash');
+  setTimeout(() => btn.classList.remove('btn-flash'), 550);
+
+  const en = btn.querySelector('.en-text');
+  const zh = btn.querySelector('.zh-text');
+  const oEn = en ? en.textContent : '';
+  const oZh = zh ? zh.textContent : '';
+
+  btn.classList.add('btn-done');
+  if (en) en.textContent = doneLabelEn;
+  if (zh) zh.textContent = doneLabelZh;
+
+  setTimeout(() => {
+    btn.classList.remove('btn-done');
+    if (en) en.textContent = oEn;
+    if (zh) zh.textContent = oZh;
+  }, 1400);
+}
+
+function flashResults() {
+  document.querySelectorAll('#results-panel .result-item').forEach((el, i) => {
+    setTimeout(() => {
+      el.classList.remove('updated');
+      void el.offsetWidth;
+      el.classList.add('updated');
+      setTimeout(() => el.classList.remove('updated'), 700);
+    }, i * 45);
+  });
+}
+
+let toastEl = null;
+function showToast(titleEn, titleZh, bodyEn, bodyZh) {
+  if (!toastEl) {
+    toastEl = document.createElement('div');
+    toastEl.className = 'toast';
+    document.body.appendChild(toastEl);
+  }
+  toastEl.innerHTML = `
+    <span class="t-title"><span class="en-text">${titleEn}</span><span class="zh-text">${titleZh}</span></span>
+    <span class="t-body"><span class="en-text">${bodyEn}</span><span class="zh-text">${bodyZh}</span></span>`;
+  void toastEl.offsetWidth;
+  toastEl.classList.add('show');
+  clearTimeout(toastEl._t);
+  toastEl._t = setTimeout(() => toastEl.classList.remove('show'), 3600);
+}
+
+// ─────────────────────────────────────────
+// OCP DEFAULT VALUES — single source of truth
+// OCP Project Deschutes v1.0 §3.1 · single 2 MW CDU
+// ─────────────────────────────────────────
+const OCP_DEFAULT = {
+  it_power:     2000,     // §3.1 Thermal load (kW)
+  cdu_count:    1,        // single 2 MW CDU
+  pue:          1.0,      // pure IT thermal load
+  temp_in:      30,       // secondary supply — within 18–55°C window
+  // ΔT = 15 °C — author-selected reference scenario, and also one of the
+  // §20.4 validation matrix conditions (10 / 15 / 20 / 25 °C). The
+  // specification does not require 15 °C at the 2 MW design point.
+  temp_out:     45,
+  coolant_type: 'water',  // §3.1 DI water approved
+  chw_in:       27,       // approach = 3°C (§3.1 target)
+  chw_out:      42,
+};
+
+function resetToDefault() {
+  Object.entries(OCP_DEFAULT).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  });
+  calculate(true);
+  btnFeedback(document.getElementById('btn-default'), '✔ RESET DONE', '✔ 已回復預設');
+  showToast(
+    '↺ DEFAULT RESTORED',
+    '↺ 已回復預設值',
+    'OCP Project Deschutes v1.0 §3.1 — 2 MW × 1 CDU · DI water · ΔT 15°C',
+    'OCP Project Deschutes v1.0 §3.1 — 2 MW × 1 台 CDU · 純水 · ΔT 15°C'
+  );
+}
+
+// ─────────────────────────────────────────
+// OCP DESCHUTES PRESET — 2 MW / 500 GPM / 18-55°C window
+// ─────────────────────────────────────────
+function applyOCPPreset() {
+  // Animated fill using the shared OCP_DEFAULT constant
+  const entries = Object.entries(OCP_DEFAULT);
+
+  entries.forEach(([id, val], i) => {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.value = val;
+      el.style.transition = 'all 0.25s ease';
+      el.style.borderColor = 'var(--red)';
+      el.style.background  = 'rgba(226,0,26,0.10)';
+      setTimeout(() => { el.style.borderColor = ''; el.style.background = ''; }, 550);
+    }, i * 70);
+  });
+
+  setTimeout(() => {
+    calculate(true);
+    btnFeedback(document.getElementById('btn-ocp'), '✔ OCP PRESET LOADED', '✔ OCP 預設已套用');
+    showToast(
+      '⬡ OCP DESCHUTES v1.0',
+      '⬡ OCP DESCHUTES v1.0',
+      '2 MW × 1 CDU · 500 GPM target · DI water · ΔT 15°C · approach ≤3°C (§3.1)',
+      '2 MW × 1 台 CDU · 目標 500 GPM · 純水 · ΔT 15°C · 趨近溫度 ≤3°C (§3.1)'
+    );
+  }, entries.length * 70 + 150);
+}
+
+// ─────────────────────────────────────────
+// OCP RACK DEFAULTS — spec values only, no derivations
+// §18.3  p.55: 1 bay = 4 IT racks per side of hot aisle (x2 sides = 8)
+// §18.8.1 p.61: 90 kW per rack spot (1 s timescale, 3 of 4 feeds)
+// §18.1  p.54: rack 28in W x 50in D x 90.55in H max
+// ─────────────────────────────────────────
+const RACK_DEFAULT = {
+  rack_count:     8,        // §18.3 p.55: 1 bay = 4 racks per side x 2 sides
+  rack_power:     90,       // §18.8.1 p.61 load power support per rack spot
+  cooling_method: 'dlc',    // D2C per §1 (AI/ML ASICs)
+  lc_coverage:    70,       // DLC + RDHx hybrid (§18.9)
+  rack_tin:       30,       // within OCP 18–55°C window
+  rack_tout:      45,       // ΔT = 15 °C — author-selected reference scenario
+};
+
+function resetRackDefault() {
+  Object.entries(RACK_DEFAULT).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  });
+  calcRack(true);
+  btnFeedback(document.getElementById('btn-rack-default'), '✔ RESET DONE', '✔ 已回復預設');
+  showToast('↺ DEFAULT RESTORED', '↺ 已回復預設值',
+    'OCP §18.3 p.55 — 1 bay = 8 racks · §18.8.1 p.61 — 90 kW/rack · DI water, DT 15C',
+    'OCP §18.3 p.55 — 1 bay = 8 架 · §18.8.1 p.61 — 每架 90 kW · 純水，ΔT 15°C');
+}
+
+function applyRackOCPPreset() {
+  const entries = Object.entries(RACK_DEFAULT);
+  entries.forEach(([id, val], i) => {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.value = val;
+      el.style.transition = 'all 0.25s ease';
+      el.style.borderColor = 'var(--red)';
+      el.style.background  = 'rgba(226,0,26,0.10)';
+      setTimeout(() => { el.style.borderColor=''; el.style.background=''; }, 550);
+    }, i * 70);
+  });
+  setTimeout(() => {
+    calcRack(true);
+    btnFeedback(document.getElementById('btn-rack-ocp'), '✔ HAC PRESET LOADED', '✔ HAC 預設已套用');
+    showToast('⬡ OCP REDMOND HAC', '⬡ OCP REDMOND HAC',
+      '§18.3 p.55: 1 bay = 4 racks per side x 2 = 8 racks · §18.8.1 p.61: 90 kW per rack spot',
+      '§18.3 p.55：1 bay = 每側 4 架 × 2 = 8 架 · §18.8.1 p.61：每架 90 kW');
+  }, entries.length * 70 + 150);
+}
+
+// ─────────────────────────────────────────
+// RACK CALCULATOR
+// ─────────────────────────────────────────
+function calcRack(withFeedback) {
+  // Note: bounded reads — same enforcement as the CDU calculator
+  const racks    = readNum('rack_count',  8,  true);
+  const rPower   = readNum('rack_power',  90, false);
+  const lcPct    = readNum('lc_coverage', 70, false) / 100;
+  const tin      = readNum('rack_tin',    30, false);
+  const tout     = readNum('rack_tout',   45, false);
+
+  const total    = racks * rPower;        // kW
+  const liqLoad  = total * lcPct;
+  const airLoad  = total * (1 - lcPct);
+  const dt       = tout - tin;
+  // Note: guard the division — tout <= tin returned Infinity or a negative flow
+  if (!(dt > 0)) {
+    showToast('⚠ INVALID ΔT', '⚠ ΔT 無效',
+      'Rack return temperature must be above supply temperature',
+      '機架回水溫度必須高於供水溫度');
+    return;
+  }
+  const cp = 4.182, rho = 998;
+  const massFlow = (liqLoad * 1000) / (cp * 1000 * dt);
+  const volFlow  = (massFlow / rho) * 3600;
+  const perRack  = liqLoad > 0 ? (volFlow * 1000 / 60 / racks) : 0;
+  // ═══ correction — §3.1 rates the CDU at 2,000 kW. the baseline prototype divided by 100,
+  // which reported 20x the units required and contradicted the 2 MW figure
+  // used by the compliance message a few lines below.
+  const cduNeeded = Math.max(1, Math.ceil(liqLoad / 2000));
+
+  document.getElementById('rk-total').textContent = total.toFixed(0);
+  document.getElementById('rk-liq').textContent   = liqLoad.toFixed(0);
+  document.getElementById('rk-air').textContent   = airLoad.toFixed(0);
+  document.getElementById('rk-flow').textContent  = volFlow.toFixed(2);
+  document.getElementById('rk-per').textContent   = perRack.toFixed(1);
+  document.getElementById('rk-cdu').textContent   = cduNeeded;
+
+  const rackProducts = buildRackProducts(racks, liqLoad, volFlow, cduNeeded);
+  renderProductTable('rack-tbody', rackProducts);
+
+  document.getElementById('rack-results').style.display = 'block';
+
+  // ── OCP capacity + compliance feedback ──
+  if (withFeedback) {
+    document.querySelectorAll('#rack-results .result-item').forEach((el, i) => {
+      setTimeout(() => {
+        el.classList.remove('updated'); void el.offsetWidth; el.classList.add('updated');
+        setTimeout(() => el.classList.remove('updated'), 700);
+      }, i * 45);
+    });
+    btnFeedback(document.getElementById('btn-rack-calc'), '✔ CALCULATED', '✔ 計算完成');
+
+    // Note: only the liquid-cooled fraction reaches the CDU; the air fraction
+    // is rejected by the room. the baseline prototype tested the combined load against §3.1.
+    const overCap  = liqLoad > 2000;                // §3.1 single-CDU capacity
+    const overRack = rPower > 90;                   // §18.8.1 per-rack limit
+    let tEn, tZh, bEn, bZh;
+    if (overRack) {
+      tEn = '⚠ EXCEEDS §18.8.1'; tZh = '⚠ 超出 §18.8.1 規範';
+      bEn = `${rPower} kW/rack exceeds OCP limit of 90 kW per rack spot`;
+      bZh = `每架 ${rPower} kW 超出 OCP 規範上限 90 kW/架`;
+    } else if (overCap) {
+      tEn = '⚠ MULTI-CDU REQUIRED'; tZh = '⚠ 需要多台 CDU';
+      bEn = `Liquid load ${liqLoad.toFixed(0)} kW > 2 MW single-CDU capacity → ${cduNeeded} CDUs (N+1: ${cduNeeded+1})`;
+      bZh = `液冷負載 ${liqLoad.toFixed(0)} kW 超過單台 2 MW 容量 → 需 ${cduNeeded} 台 CDU (N+1: ${cduNeeded+1} 台)`;
+    } else {
+      tEn = '✔ WITHIN OCP ENVELOPE'; tZh = '✔ 符合 OCP 規範';
+      bEn = `${total.toFixed(0)} kW · liquid ${liqLoad.toFixed(0)} kW · ${volFlow.toFixed(1)} m³/h (${(volFlow*4.4029).toFixed(0)} GPM) · ${cduNeeded} CDU`;
+      bZh = `${total.toFixed(0)} kW · 液冷 ${liqLoad.toFixed(0)} kW · ${volFlow.toFixed(1)} m³/h (${(volFlow*4.4029).toFixed(0)} GPM) · ${cduNeeded} 台 CDU`;
+    }
+    showToast(tEn, tZh, bEn, bZh);
+  }
+
+  // ── Sync to Real-time Monitor ──
+  syncMonitorFromRack({
+    racks:      racks,
+    rPower:     rPower,
+    total:      total,
+    liqLoad:    liqLoad,
+    volFlow:    volFlow,
+    perRack:    perRack,
+    cduNeeded:  cduNeeded,
+    tin:        tin,
+    tout:       tout
+  });
+}
+
+// ─────────────────────────────────────────
+// PRODUCT LIST BUILDER – CDU
+// ─────────────────────────────────────────
+function buildProductList(totalHeat, volFlow, cduCount) {
+  const products = [];
+
+  // Balancing valve — one per CDU
+  products.push({
+    name: 'AB-QM + NovoCon® Digital Actuator',
+    code: 'AB-QM DN40–DN100 · bus communication',
+    tag: 'valve',
+    tagLabel: 'Valve',
+    fn_en: 'Primary circuit balancing per CDU',
+    fn_zh: '每台 CDU 主迴路平衡',
+    qty: cduCount
+  });
+
+  // Control valve
+  products.push({
+    name: 'AB-PM 2-Port Control Valve',
+    code: 'AB-PM + AME series actuator',
+    tag: 'valve',
+    tagLabel: 'Valve',
+    fn_en: 'CDU flow modulation control',
+    fn_zh: 'CDU 流量調節控制',
+    qty: cduCount
+  });
+
+  // DP valve
+  products.push({
+    name: 'AVPB Differential Pressure Controller',
+    code: 'AVPB DN25–DN65',
+    tag: 'valve',
+    tagLabel: 'Valve',
+    fn_en: 'System ΔP stabilization',
+    fn_zh: '系統差壓穩定',
+    qty: Math.ceil(cduCount / 2)
+  });
+
+  // Flow meter — §3.2 item 11 requires CDU flow telemetry on both circuits,
+  // §3.2 item 12 sets the accuracy at ±0.5 % of reading.
+  // Note: size on the PER-CDU flow. the baseline prototype sized on the plant total, so a
+  // 4-CDU plant specified DN100 on units each passing 115 m³/h.
+  const flowPerCDU = volFlow / Math.max(1, cduCount);
+  const meterSize = flowPerCDU > 150 ? 'DN150' : flowPerCDU > 90 ? 'DN100' : flowPerCDU > 40 ? 'DN65' : 'DN40';
+  products.push({
+    name: 'MAG 5000 Electromagnetic Flow Meter',
+    code: `MAG 5000 ${meterSize} · ±0.4 % of reading`,
+    tag: 'sensor',
+    tagLabel: 'Sensor',
+    fn_en: 'Secondary + primary flow measurement (§3.2 items 11, 12)',
+    fn_zh: '二次側 + 一次側流量計量 (§3.2 第 11、12 項)',
+    qty: cduCount * 2
+  });
+
+  // Energy meter
+  products.push({
+    name: 'MC 302 Heat Energy Meter',
+    code: 'Kamstrup MC 302',
+    tag: 'sensor',
+    tagLabel: 'Sensor',
+    fn_en: 'CDU cooling energy metering',
+    fn_zh: 'CDU 冷卻能耗計量',
+    qty: cduCount
+  });
+
+  // Temp sensors
+  products.push({
+    name: 'MBT 3560 Temperature Sensor',
+    code: 'MBT 3560 · DC mission-critical',
+    tag: 'sensor',
+    tagLabel: 'Sensor',
+    fn_en: 'Manifold temperature RWS/RWR/PCWS/PCWR (§7.2.1)',
+    fn_zh: '四管溫度 RWS/RWR/PCWS/PCWR (§7.2.1)',
+    qty: cduCount * 4
+  });
+
+  // Pressure transmitter
+  products.push({
+    name: 'DST P140 Pressure Sensor',
+    code: 'DST P140 · oil-filled MEMS',
+    tag: 'sensor',
+    tagLabel: 'Sensor',
+    fn_en: 'Manifold absolute pressure, 4 points (§7.2.1)',
+    fn_zh: '四管絕對壓力，4 點 (§7.2.1)',
+    qty: cduCount * 4
+  });
+
+  // VFD — §7.3 specifies two pumps per CDU, each with its own drive; §6.1
+  // rates the pump at 37 kW and §7.4 the drive at 50 hp (37.3 kW).
+  // Note: the baseline prototype sized the drive from plant heat load (0.015 x kW) and fitted
+  // one per CDU. Both were wrong against the specification.
+  products.push({
+    name: 'iC7 Series VFD',
+    code: 'iC7 37 kW / 50 hp · Auto Energy Optimization',
+    tag: 'drive',
+    tagLabel: 'Drive',
+    fn_en: 'Pump VFD, one per pump, N+1 (§7.3, §7.4)',
+    fn_zh: '泵浦變頻器，每泵一台，N+1 (§7.3、§7.4)',
+    qty: cduCount * 2
+  });
+
+  // Controller
+  products.push({
+    name: 'Alsmart® HVAC Controller Platform',
+    code: 'Alsmart® + remote monitoring',
+    tag: 'controller',
+    tagLabel: 'Controller',
+    fn_en: 'CDU temperature + flow control logic',
+    fn_zh: 'CDU 溫度 + 流量控制邏輯',
+    qty: cduCount
+  });
+
+  // Leak detection — §3.2 item 10 requires rope detection over 3 zones,
+  // monitored through the PLC. the baseline prototype showed the signal but listed no hardware.
+  products.push({
+    name: 'Leak Detection Rope + Zone Controller',
+    code: '3-zone rope, PLC-monitored',
+    tag: 'sensor',
+    tagLabel: 'Sensor',
+    fn_en: 'Leak detection, 3 zones via PLC (§3.2 item 10)',
+    fn_zh: '洩漏偵測，3 區經 PLC (§3.2 第 10 項)',
+    qty: cduCount
+  });
+
+  // Coolant quality — §3.2 item 26 requires pH and conductivity telemetry.
+  products.push({
+    name: 'Coolant Quality Transmitter',
+    code: 'pH + electrical conductivity',
+    tag: 'sensor',
+    tagLabel: 'Sensor',
+    fn_en: 'Coolant pH and conductivity telemetry (§3.2 item 26)',
+    fn_zh: '冷卻液 pH 與電導度遙測 (§3.2 第 26 項)',
+    qty: cduCount * 2
+  });
+
+  // AK-SC BMS
+  products.push({
+    name: 'AK-SC355 System Manager',
+    code: 'AK-SC355 + I/O modules',
+    tag: 'controller',
+    tagLabel: 'Controller',
+    fn_en: 'DCIM/BMS central integration',
+    fn_zh: 'DCIM/BMS 中央整合',
+    qty: 1
+  });
+
+  return products;
+}
+
+// ─────────────────────────────────────────
+// PRODUCT LIST BUILDER – RACK
+// ─────────────────────────────────────────
+function buildRackProducts(racks, liqLoad, volFlow, cduNeeded) {
+  const products = [];
+
+  products.push({
+    name: 'AVQM Pressure Independent Control Valve',
+    code: 'AVQM DN15–DN20',
+    tag: 'valve', tagLabel: 'Valve',
+    fn_en: 'Per-rack flow control (1 per rack)',
+    fn_zh: '每架流量控制 (每架 1 個)',
+    qty: racks
+  });
+
+  products.push({
+    name: 'AB-PM 2-Port Control Valve + Actuator',
+    code: 'AB-PM + AME 10',
+    tag: 'valve', tagLabel: 'Valve',
+    fn_en: 'CDU secondary circuit control',
+    fn_zh: 'CDU 二次迴路控制',
+    qty: cduNeeded
+  });
+
+  products.push({
+    name: 'MBT 3560 Temperature Sensor',
+    code: 'MBT 3560 · DC mission-critical',
+    tag: 'sensor', tagLabel: 'Sensor',
+    fn_en: 'Supply/return per CDU (x2)',
+    fn_zh: '每台 CDU 供/回水溫度 (x2)',
+    qty: cduNeeded * 2
+  });
+
+  products.push({
+    name: 'MAG 5000 Flow Meter',
+    code: 'MAG 5000 DN40',
+    tag: 'sensor', tagLabel: 'Sensor',
+    fn_en: 'CDU total flow measurement',
+    fn_zh: 'CDU 總流量計量',
+    qty: cduNeeded
+  });
+
+  const vfdkw = Math.max(2.2, Math.ceil(liqLoad * 0.015));
+  products.push({
+    name: 'iC7 Series VFD',
+    code: `iC7 ${vfdkw} kW · Auto Energy Optimization`,
+    tag: 'drive', tagLabel: 'Drive',
+    fn_en: 'CDU pump VFD',
+    fn_zh: 'CDU 泵變頻器',
+    qty: cduNeeded
+  });
+
+  products.push({
+    name: 'AVPB Differential Pressure Controller',
+    code: 'AVPB DN25',
+    tag: 'valve', tagLabel: 'Valve',
+    fn_en: 'Rack manifold ΔP control',
+    fn_zh: '機架歧管差壓控制',
+    qty: Math.ceil(racks / 10)
+  });
+
+  products.push({
+    name: 'Alsmart® Controller',
+    code: 'Alsmart®',
+    tag: 'controller', tagLabel: 'Controller',
+    fn_en: 'CDU control logic',
+    fn_zh: 'CDU 控制邏輯',
+    qty: cduNeeded
+  });
+
+  return products;
+}
+
+// ─────────────────────────────────────────
+// RENDER TABLE
+// ─────────────────────────────────────────
+function renderProductTable(tbodyId, products) {
+  const isZh = document.body.classList.contains('lang-zh');
+  const tbody = document.getElementById(tbodyId);
+  tbody.innerHTML = products.map(p => `
+    <tr>
+      <td>
+        <div class="prod-name">${p.name}</div>
+        <div class="prod-code">${p.code}</div>
+      </td>
+      <td><span class="tag tag-${p.tag}">${p.tagLabel}</span></td>
+      <td style="font-size:13px;color:var(--muted);">
+        <span class="en-text">${p.fn_en}</span>
+        <span class="zh-text">${p.fn_zh}</span>
+      </td>
+      <td><span class="qty-badge">×${p.qty}</span></td>
+    </tr>
+  `).join('');
+}
+
+// Auto-calculate on load
+window.onload = () => { calculate(); renderCtrlState(); };
+
+// ─────────────────────────────────────────
+// REAL-TIME MONITOR
+// ─────────────────────────────────────────
+
+// Dynamic sensor bases — updated by syncMonitorFromCDU / syncMonitorFromRack
+// ═══ Sensor baselines at the §3.1 design point ═══
+// loaded at 200 kW / 18 m³/h, which is no operating point the
+// specification defines, so the monitor disagreed with the OCP tab until the
+// calculator was run. These are now 2,000 kW at 500 GPM with ΔT 15 °C.
+let sensorBases = {
+  'T-S01': { base:30,   range:0.8  },  // RWS supply temp
+  'T-R01': { base:45,   range:1.0  },  // RWR return temp
+  'T-S02': { base:32,   range:0.8  },  // server inlet
+  'T-R02': { base:43,   range:1.2  },  // server outlet
+  // Note: display variation held under ±0.5 % of reading so it cannot be
+  // mistaken for a violation of the §3.2 item 12 flow-meter accuracy band
+  'F-M01': { base:115,  range:0.55 },  // CDU flow m³/h = 506 GPM
+  'F-M02': { base:115,  range:0.55 },  // facility flow m³/h
+  'P-T01': { base:3.5,  range:0.15 },  // CDU inlet pressure
+  'P-T02': { base:5.86, range:0.12 },  // system ΔP — §3.1 IT dP 80–90 psi (5.5–6.2 bar)
+
+  // ═══ OCP §7.2.1 System Feedback — added in the baseline prototype ═══
+  'T-S03': { base:27,   range:0.6  },  // PCW supply — §3.1 approach 3 °C below RWS
+  'T-R03': { base:42,   range:0.9  },  // PCW return
+  // Correction (audit finding m-12):: the baseline prototype put the return manifold at 1.1 bar abs, i.e.
+  // ~0.09 bar gauge — atmospheric. A closed loop with the §3.2 item 9
+  // flow-through expansion tank holds a static fill above atmosphere. Pair
+  // rebased to 2.5 bar abs return / 8.4 bar abs supply: the same 5.9 bar
+  // (86 psi) differential, and 8.4 bar abs = 107 psig, inside §3.1 0–130 psig.
+  'P-M01': { base:8.4,  range:0.12 },  // RWS manifold, abs
+  'P-M02': { base:2.5,  range:0.10 },  // RWR manifold, abs → dP 5.9 bar = 86 psi ✔ §3.1
+  'P-M03': { base:4.2,  range:0.10 },  // PCWS manifold, abs
+  'P-M04': { base:2.9,  range:0.10 },  // PCWR manifold, abs → dP 1.3 bar = 19 psi ✔ §3.1 15–30
+  // §5.1.1 requires ~92 % PWM to hold 85 psi at 500 GPM — solved, not assumed
+  'S-P01': { base:3313, range:35   },  // pump 1 RPM @ 92 %
+  'S-P02': { base:3313, range:35   },  // pump 2 RPM @ 92 %
+  'S-PP1': { base:92.0, range:1.0  },  // pump 1 speed %
+  'S-PP2': { base:92.0, range:1.0  },  // pump 2 speed %
+  'E-P01': { base:28.8, range:0.3  },  // pump 1 kW — §6.1 37 kW nameplate, P ∝ n³
+  'E-P02': { base:28.8, range:0.3  },  // pump 2 kW
+  'V-C01': { base:68,   range:1.5  },  // primary valve position % — §6.3 Belimo B6500
+  'T-M01': { base:68.6, range:1.8  },  // pump motor temp
+  'A-OT1': { base:0,    range:0    },  // §7.2.1 discrete over-temperature alarm
+  'A-OT2': { base:0,    range:0    },  // §7.2.1 discrete over-temperature alarm
+  'E-M01': { base:2000, range:8    },  // IT power kW — §3.1 design point
+  'E-M02': { base:57.6, range:1.5  },  // CDU electrical power kW
+  'E-M03': { base:1.12, range:0.01 },  // facility energy ratio — input assumption
+  'T-A01': { base:23,   range:0.5  },  // ambient
+  'Q-PH1': { base:8.0,  range:0.15 },  // coolant pH (OCP telemetry)
+  'Q-EC1': { base:12,   range:2    },  // conductivity µS/cm
+  // §5.3 Table 5.3 interpolates to ~2.24 °C at 500 GPM / 2000 kW; the OCP
+  // preset inputs (30 °C secondary, 27 °C primary) give 3.0 °C by the §7.2.2
+  // definition. Driven by the calculator, not held here.
+  'A-TP1': { base:3.0,  range:0.3  },  // approach temp
+  'L-Z01': { base:0,    range:0.3  },  // leak zones triggered
+};
+
+function syncMonitorFromCDU(d) {
+  // ═══ Per-unit telemetry scope ═══
+  // The calculator returns plant totals across d.cduCount units. the baseline prototype wrote
+  // those totals straight into per-unit sensors, so at 4 CDUs the monitor
+  // showed 4x the flow and load a single §3.1 unit ever sees.
+  const n = Math.max(1, d.cduCount || 1);
+  sensorBases['T-S01'].base = d.temp_in;
+  sensorBases['T-R01'].base = d.temp_out;
+  sensorBases['T-S02'].base = d.temp_in + 2;
+  sensorBases['T-R02'].base = d.temp_out - 2;
+  sensorBases['F-M01'].base = parseFloat((d.volFlow / n).toFixed(1));
+  sensorBases['F-M02'].base = parseFloat((d.chwFlow / n).toFixed(1));
+  sensorBases['E-M01'].base = parseFloat((d.totalHeat / n).toFixed(0));
+  // Note: E-M03 is the facility energy ratio the user entered. It is an input
+  // assumption echoed back, not a derived result — the baseline prototype computed
+  // 1 + (Q x 0.12)/Q, which cancels to a constant 1.12 whatever the inputs.
+  sensorBases['E-M03'].base = parseFloat(d.pue.toFixed(3));
+  sensorBases['P-T01'].range = 0.2;
+
+  // §7.2.1 manifold temperatures follow the facility-side inputs
+  if (sensorBases['T-S03']) sensorBases['T-S03'].base = d.chw_in;
+  if (sensorBases['T-R03']) sensorBases['T-R03'].base = d.chw_out;
+  // §7.2.2 approach = secondary supply − primary supply. the baseline prototype set this here
+  // and then applyControlEffects overwrote it with a hard-coded 2.3, so the
+  // card never moved. The overwrite is gone; this is now the only writer.
+  if (sensorBases['A-TP1']) sensorBases['A-TP1'].base =
+    parseFloat(Math.max(0, d.approach).toFixed(2));
+  // E-M02 (CDU power) and every hydraulic signal are derived in
+  // applyControlEffects from the flow set above — not written here.
+  captureNominal();
+  applyControlEffects();
+  addSyncLog('CDU Calculator');
+}
+
+function syncMonitorFromRack(d) {
+  // ═══ Per-unit telemetry scope, shared derivation path with the
+  // CDU calculator. the baseline prototype wrote plant totals here and set E-M02 / E-M03 on a
+  // different basis than syncMonitorFromCDU, so the two calculators left the
+  // monitor in two different states for the same physical situation.
+  const n = Math.max(1, d.cduNeeded || 1);
+  sensorBases['T-S01'].base = d.tin;
+  sensorBases['T-R01'].base = d.tout;
+  sensorBases['T-S02'].base = d.tin + 3;
+  sensorBases['T-R02'].base = d.tout - 3;
+  sensorBases['F-M01'].base = parseFloat((d.volFlow / n).toFixed(1));
+  sensorBases['F-M02'].base = parseFloat((d.volFlow / n).toFixed(1));
+  sensorBases['E-M01'].base = parseFloat((d.liqLoad / n).toFixed(0));
+  if (sensorBases['A-TP1']) sensorBases['A-TP1'].base =
+    parseFloat(Math.max(0, d.tin - sensorBases['T-S03'].base).toFixed(2));
+  captureNominal();
+  applyControlEffects();
+  addSyncLog('Rack Calculator');
+}
+
+function addSyncLog(source) {
+  const log = document.getElementById('event-log');
+  if (!log) return;
+  const now = new Date().toLocaleTimeString('en-GB');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `
+    <span class="log-time">${now}</span>
+    <span class="log-ok">
+      <span class="en-text">🔁 Monitor synced from ${source} — sensor bases updated</span>
+      <span class="zh-text">🔁 監控已從 ${source} 同步 — 感測器基準值已更新</span>
+    </span>`;
+  log.insertBefore(entry, log.firstChild);
+}
+
+const SENSORS = [
+  { id:'T-S01', label_en:'Rack Water Supply', label_zh:'機架供水溫度 RWS',    type:'temp',  unit:'°C',  min:5,  max:60, warn:38, alert:45 },
+  { id:'T-S02', label_en:'Server Inlet Temp', label_zh:'伺服器進水',   type:'temp',  unit:'°C',  min:10, max:55, warn:40, alert:48 },
+  { id:'T-R02', label_en:'Server Outlet Temp',label_zh:'伺服器出水',   type:'temp',  unit:'°C',  min:20, max:70, warn:52, alert:60 },
+  { id:'T-R01', label_en:'Rack Water Return', label_zh:'機架回水溫度 RWR',    type:'temp',  unit:'°C',  min:15, max:70, warn:50, alert:58 },
+  // Note: §5.3 target is <= 3 °C, so exactly 3.0 is compliant. the baseline prototype warned at
+  // >= 3, which put the card in amber at the specification's own design point.
+  { id:'A-TP1', label_en:'Approach Temp',     label_zh:'趨近溫度',    type:'temp',  unit:'°C',  min:0,  max:10, warn:3.2,alert:5 },
+  { id:'F-M01', label_en:'CDU Flow Rate',     label_zh:'CDU 流量',    type:'flow',  unit:'m³/h',min:0,  max:200,warn:5,  alert:2 },
+  { id:'F-M02', label_en:'Process Chill Water Flow', label_zh:'冰水側流量 PCW',   type:'flow',  unit:'m³/h',min:0,  max:200,warn:5,  alert:2 },
+  { id:'P-T01', label_en:'CDU Inlet Pressure',label_zh:'CDU 進口壓力', type:'press', unit:'bar', min:0,  max:10, warn:7,  alert:8.5},
+  // §3.1 IT dP available 80–90 psi = 5.5–6.2 bar. Below 5.5 bar the CDU can no
+  // longer deliver spec pressure to the IT loop — flagged on the low side.
+  { id:'P-T02', label_en:'System ΔP',         label_zh:'系統差壓',    type:'press', unit:'bar', min:0,  max:9,  warn:6.5,alert:7.2, lowWarn:5.5, lowAlert:4.8 },
+  { id:'E-M01', label_en:'IT Power Load',     label_zh:'IT 功率負載',  type:'power', unit:'kW',  min:0,  max:2500,warn:2200,alert:2400},
+  // Note: this is the CDU's own electrical draw (pumps on drives). §3.1 gives
+  // 74 kW, which §7.4 shows to be 2 x 38 kW of drive provisioning.
+  { id:'E-M02', label_en:'CDU Power',         label_zh:'CDU 功耗',    type:'power', unit:'kW',  min:0,  max:100,warn:74, alert:80},
+  { id:'E-M03', label_en:'Cooling Energy Ratio', label_zh:'冷卻能耗比', type:'power', unit:'',    min:1,  max:2,  warn:1.4,alert:1.6},
+  { id:'Q-PH1', label_en:'Coolant pH',        label_zh:'冷卻液 pH 值', type:'flow',  unit:'',    min:6,  max:10, warn:9,  alert:9.5 },
+  { id:'Q-EC1', label_en:'Conductivity',      label_zh:'電導度',      type:'flow',  unit:'µS/cm',min:0, max:50, warn:30, alert:40 },
+  // Note: discrete zone count — the baseline prototype rendered Gaussian noise to 3 decimals,
+  // so the leak card displayed values such as -0.183 zones.
+  { id:'L-Z01', label_en:'Leak Zones (3)',    label_zh:'洩漏偵測 (3區)', type:'press', unit:'',   min:0,  max:3,  warn:1,  alert:2, intOnly:true },
+  { id:'T-A01', label_en:'Ambient Temp',      label_zh:'環境溫度',    type:'temp',  unit:'°C',  min:15, max:40, warn:30, alert:35 },
+
+  // ═══ OCP §7.2.1 System Feedback — added in the baseline prototype ═══
+  // Manifold temperature — 4 points required (RWS / RWR / PCWS / PCWR)
+  { id:'T-S03', label_en:'PCW Supply Temp',   label_zh:'冰水供水溫度 PCWS', type:'temp', unit:'°C', min:5,  max:50, warn:35, alert:42 },
+  { id:'T-R03', label_en:'PCW Return Temp',   label_zh:'冰水回水溫度 PCWR', type:'temp', unit:'°C', min:10, max:60, warn:45, alert:52 },
+  // Absolute pressure — 4 manifolds. §3.1 operating pressure 0–130 psig.
+  // 130 psig = 8.96 bar gauge = 9.97 bar ABSOLUTE — these signals are absolute.
+  { id:'P-M01', label_en:'RWS Manifold Press.',  label_zh:'機架供水壓力 RWS', type:'press', unit:'bar', min:0, max:11, warn:9.5, alert:9.97 },
+  { id:'P-M02', label_en:'RWR Manifold Press.',  label_zh:'機架回水壓力 RWR', type:'press', unit:'bar', min:0, max:11, warn:9.5, alert:9.97 },
+  { id:'P-M03', label_en:'PCWS Manifold Press.', label_zh:'冰水供水壓力 PCWS', type:'press', unit:'bar', min:0, max:11, warn:9.5, alert:9.97 },
+  { id:'P-M04', label_en:'PCWR Manifold Press.', label_zh:'冰水回水壓力 PCWR', type:'press', unit:'bar', min:0, max:11, warn:9.5, alert:9.97 },
+  // Pump speed — RPM and percent, per pump. §6.1 SPECK TOEMA065200
+  // Note: bands moved to flag loss of speed reserve. §5.1.1 puts the N+1
+  // design point at ~92 % (3313 RPM); the baseline prototype warned at 3300, so the correct
+  // operating point rendered as an alarm.
+  { id:'S-P01', label_en:'Pump 1 Speed',      label_zh:'泵浦 1 轉速',  type:'power', unit:'RPM', min:0, max:3600, warn:3492, alert:3582 },
+  { id:'S-P02', label_en:'Pump 2 Speed',      label_zh:'泵浦 2 轉速',  type:'power', unit:'RPM', min:0, max:3600, warn:3492, alert:3582 },
+  { id:'S-PP1', label_en:'Pump 1 Speed %',    label_zh:'泵浦 1 轉速 %', type:'power', unit:'%',  min:0, max:100, warn:97, alert:99.5 },
+  { id:'S-PP2', label_en:'Pump 2 Speed %',    label_zh:'泵浦 2 轉速 %', type:'power', unit:'%',  min:0, max:100, warn:97, alert:99.5 },
+  // Power consumption per pump. §6.1 rated 37 kW each
+  { id:'E-P01', label_en:'Pump 1 Power',      label_zh:'泵浦 1 功耗',  type:'power', unit:'kW', min:0, max:45, warn:38, alert:41 },
+  { id:'E-P02', label_en:'Pump 2 Power',      label_zh:'泵浦 2 功耗',  type:'power', unit:'kW', min:0, max:45, warn:38, alert:41 },
+  // Primary circuit control valve position. §6.3 Belimo B6500
+  { id:'V-C01', label_en:'Primary Valve Pos.', label_zh:'主迴路閥位',  type:'flow',  unit:'%',  min:0, max:100, warn:92, alert:98 },
+  // Motor overtemp alarm — §7.2.1 "Alarms for detected leaks and motor overtemp"
+  { id:'T-M01', label_en:'Pump Motor Temp',   label_zh:'泵浦馬達溫度', type:'temp',  unit:'°C', min:20, max:130, warn:90, alert:105 },
+  // §7.2.1 requires "Alarms for detected leaks and motor overtemp" — an alarm,
+  // not only a temperature. These are the discrete alarm states the clause asks
+  // for; T-M01 above remains the measured value that drives them.
+  { id:'A-OT1', label_en:'Pump 1 Overtemp Alarm', label_zh:'泵浦 1 過溫警報', type:'temp', unit:'', min:0, max:1, warn:1, alert:1, intOnly:true },
+  { id:'A-OT2', label_en:'Pump 2 Overtemp Alarm', label_zh:'泵浦 2 過溫警報', type:'temp', unit:'', min:0, max:1, warn:1, alert:1, intOnly:true },
+];
+
+let sensorValues = {};
+let chartData    = { temps: [], flows: [], labels: [] };
+const MAX_POINTS = 20;
+let tempChart = null, flowChart = null;
+let monitorRunning = false;
+let monitorTimer   = null;
+
+function randNoise(base, range) {
+  return base + (Math.random() - 0.5) * range * 2;
+}
+
+function getSensorVal(s) {
+  const b = sensorBases[s.id];
+  const raw = randNoise(b.base, b.range);
+  // Note: discrete signals are counts, not measurements
+  if (s.intOnly) return Math.max(s.min, Math.min(s.max, Math.round(raw)));
+  return parseFloat(raw.toFixed(
+    s.unit === '' ? 3 : s.unit === 'bar' ? 2 : s.unit === 'RPM' ? 0 : 1
+  ));
+}
+
+function getStatus(s, val) {
+  // — optional low-side band: flags a signal that falls BELOW its spec
+  // window (e.g. §3.1 IT dP 80–90 psi lost when running N instead of N+1)
+  if (s.lowAlert !== undefined && val <= s.lowAlert) return 'alert';
+  if (s.lowWarn  !== undefined && val <= s.lowWarn)  return 'warn';
+
+  if (s.warn < s.alert) {
+    if (val >= s.alert) return 'alert';
+    if (val >= s.warn)  return 'warn';
+  } else {
+    if (val <= s.alert) return 'alert';
+    if (val <= s.warn)  return 'warn';
+  }
+  return 'ok';
+}
+
+// ═══ Design note — two-tier sensor layout ═══
+// KPI = what a CDU operator watches continuously. Everything else is
+// diagnostic detail, kept live for §7.2.1 compliance but out of the way.
+const KPI_IDS = ['T-S01','T-R01','A-TP1','F-M01','P-T02','L-Z01'];
+
+// short spec reference shown under each KPI value
+const KPI_SPEC = {
+  'T-S01': { en:'§5 operating window 18–55 °C', zh:'§5 操作窗 18–55 °C' },
+  'T-R01': { en:'ΔT vs supply — §20.4 test matrix', zh:'與供水的 ΔT — §20.4 測試矩陣' },
+  'A-TP1': { en:'§5.3 target ≤ 3 °C', zh:'§5.3 目標 ≤ 3 °C' },
+  'F-M01': { en:'§3.1 design point 500 GPM', zh:'§3.1 設計點 500 GPM' },
+  'P-T02': { en:'§3.1 IT dP 80–90 psi (5.5–6.2 bar)', zh:'§3.1 IT 壓差 80–90 psi (5.5–6.2 bar)' },
+  'L-Z01': { en:'§3.2 item 10 — rope, 3 zones via PLC', zh:'§3.2 第 10 項 — 感測繩，3 區經 PLC' },
+};
+
+// Tier 2 grouped the way a CDU is actually laid out: loop by loop.
+const SENSOR_GROUPS = [
+  { en:'Secondary / IT Loop',  zh:'二次側 · IT 迴路',  ids:['T-S02','T-R02','P-M01','P-M02','P-T01'] },
+  { en:'Primary / Facility Loop', zh:'一次側 · 廠務迴路', ids:['T-S03','T-R03','F-M02','P-M03','P-M04','V-C01'] },
+  { en:'Pumps — N+1 (§6.1) · displayed variation is simulation noise, not sensor accuracy', zh:'泵浦 — N+1 (§6.1) · 畫面變動為模擬雜訊，非感測器精度', ids:['S-P01','S-PP1','E-P01','S-P02','S-PP2','E-P02','T-M01','A-OT1','A-OT2'] },
+  { en:'Energy — CDU power is a model estimate (pump affinity law); §3.1 rates the CDU at 74 kW', zh:'能耗 — CDU 功耗為模型估算（泵浦相似定律）；§3.1 額定 74 kW', ids:['E-M01','E-M02','E-M03'] },
+  { en:'Coolant Quality (§5.2) — OCP requires pH and conductivity telemetry but defines no alarm limits; thresholds below are engineering assumptions', zh:'冷卻液水質 (§5.2) — OCP 要求 pH 與電導度遙測但未定義警報上下限，以下門檻為工程假設', ids:['Q-PH1','Q-EC1','T-A01'] },
+];
+
+function cardHTML(s, isKpi) {
+  const spec = isKpi && KPI_SPEC[s.id]
+    ? `<div class="kpi-spec"><span class="en-text">${KPI_SPEC[s.id].en}</span><span class="zh-text">${KPI_SPEC[s.id].zh}</span></div>`
+    : '';
+  return `
+    <div class="sensor-card ${s.type}" id="card-${s.id}">
+      <div class="sensor-label">
+        <span class="en-text">${s.label_en}</span>
+        <span class="zh-text">${s.label_zh}</span>
+        <span class="sensor-id">${s.id}</span>
+      </div>
+      <div class="sensor-value status-ok" id="val-${s.id}">—</div>
+      <div class="sensor-unit">${s.unit}</div>
+      <div class="sensor-bar"><div class="sensor-bar-fill" id="bar-${s.id}" style="width:50%"></div></div>
+      ${spec}
+    </div>`;
+}
+
+function buildSensorCards() {
+  const byId = id => SENSORS.find(s => s.id === id);
+
+  // ── Tier 1 ──
+  const kpi = document.getElementById('sensor-kpi');
+  if (kpi) kpi.innerHTML = KPI_IDS.map(id => {
+    const s = byId(id);
+    return s ? cardHTML(s, true) : '';
+  }).join('');
+
+  // ── Tier 2 ──
+  const detail = document.getElementById('sensor-detail');
+  if (!detail) return;
+  const shown = new Set(KPI_IDS);
+  let html = '';
+  SENSOR_GROUPS.forEach(g => {
+    const cards = g.ids.map(byId).filter(Boolean);
+    if (!cards.length) return;
+    cards.forEach(c => shown.add(c.id));
+    html += `<div class="sensor-group-label">
+        <span class="en-text">${g.en}</span><span class="zh-text">${g.zh}</span>
+      </div>
+      <div class="monitor-grid">${cards.map(c => cardHTML(c, false)).join('')}</div>`;
+  });
+  // safety net — any sensor not placed in a group still renders, so adding a
+  // signal to SENSORS can never silently drop it from the display
+  const rest = SENSORS.filter(s => !shown.has(s.id));
+  if (rest.length) {
+    html += `<div class="sensor-group-label">
+        <span class="en-text">Other</span><span class="zh-text">其他</span>
+      </div>
+      <div class="monitor-grid">${rest.map(c => cardHTML(c, false)).join('')}</div>`;
+  }
+  detail.innerHTML = html;
+}
+
+function toggleDetail() {
+  const panel = document.getElementById('sensor-detail');
+  const btn   = document.getElementById('detail-toggle');
+  if (!panel || !btn) return;
+  const open = panel.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  if (open && typeof updateSensors === 'function') updateSensors();
+}
+
+function updateSensors() {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-GB');
+  const el = document.getElementById('last-update');
+  if (el) el.textContent = 'Updated: ' + timeStr;
+
+  SENSORS.forEach(s => {
+    const val = getSensorVal(s);
+    sensorValues[s.id] = val;
+    const status = getStatus(s, val);
+
+    const valEl = document.getElementById('val-' + s.id);
+    const barEl = document.getElementById('bar-' + s.id);
+    if (!valEl) return;
+
+    valEl.textContent = val;
+    valEl.className   = 'sensor-value status-' + status;
+
+    // bar fill %
+    const pct = Math.min(100, Math.max(0, ((val - s.min) / (s.max - s.min)) * 100));
+    if (barEl) barEl.style.width = pct + '%';
+  });
+
+  // Chart data
+  const label = now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  chartData.labels.push(label);
+  chartData.temps.push(sensorValues['T-S01'] || 20);
+  chartData.flows.push(sensorValues['F-M01'] || 18);
+  if (chartData.labels.length > MAX_POINTS) {
+    chartData.labels.shift(); chartData.temps.shift(); chartData.flows.shift();
+  }
+  updateCharts();
+  updateEventLog(timeStr);
+  updateAdvisories();
+}
+
+function updateCharts() {
+  if (tempChart) {
+    tempChart.data.labels = [...chartData.labels];
+    tempChart.data.datasets[0].data = [...chartData.temps];
+    tempChart.update('none');
+  }
+  if (flowChart) {
+    flowChart.data.labels = [...chartData.labels];
+    flowChart.data.datasets[0].data = [...chartData.flows];
+    flowChart.update('none');
+  }
+}
+
+function initCharts() {
+  if (typeof Chart === 'undefined') return;
+
+  Chart.defaults.color = '#888';
+  Chart.defaults.borderColor = '#333';
+
+  const tempCtx = document.getElementById('tempChart');
+  const flowCtx = document.getElementById('flowChart');
+  if (!tempCtx || !flowCtx) return;
+
+  const commonOpts = {
+    responsive: true,
+    animation: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { maxTicksLimit: 6, font: { size: 10 } }, grid: { color: '#2a2a2a' } },
+      y: { ticks: { font: { size: 10 } }, grid: { color: '#2a2a2a' } }
+    }
+  };
+
+  tempChart = new Chart(tempCtx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        data: [], borderColor: '#FF6B35', backgroundColor: 'rgba(255,107,53,0.08)',
+        fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2
+      }]
+    },
+    options: { ...commonOpts, scales: { ...commonOpts.scales, y: { ...commonOpts.scales.y, suggestedMin: 10, suggestedMax: 45, title: { display: true, text: '°C', font:{size:10} } } } }
+  });
+
+  flowChart = new Chart(flowCtx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        data: [], borderColor: '#0099FF', backgroundColor: 'rgba(0,153,255,0.08)',
+        fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2
+      }]
+    },
+    options: { ...commonOpts, scales: { ...commonOpts.scales, y: { ...commonOpts.scales.y, suggestedMin: 0, suggestedMax: 35, title: { display: true, text: 'm³/h', font:{size:10} } } } }
+  });
+}
+
+let logEntries = [];
+const LOG_MSGS = [
+  { status:'ok',   en:'CDU-01 operating within normal parameters',    zh:'CDU-01 運行正常' },
+  { status:'ok',   en:'Flow balanced — ΔP within setpoint',           zh:'流量平衡，差壓正常' },
+  { status:'warn', en:'Supply temp approaching upper limit',           zh:'供水溫度接近上限' },
+  { status:'ok',   en:'PUE nominal — cooling efficiency good',         zh:'PUE 正常，冷卻效率良好' },
+  { status:'warn', en:'IT load increased +8% — adjusting flow',        zh:'IT 負載上升 8%，正在調整流量' },
+  { status:'ok',   en:'Valve position updated by control model',       zh:'閥門位置已由控制模型更新' },
+  { status:'ok',   en:'Digital Twin state updated',                    zh:'Digital Twin 狀態已更新' },
+  { status:'alert',en:'CDU return temp spike detected — monitoring',   zh:'CDU 回水溫度異常，持續監控中' },
+  { status:'ok',   en:'Pump speed adjusted to 92% — holding ΔP setpoint', zh:'泵速調整至 92%，維持壓差設定' },
+];
+let logIdx = 0;
+
+function updateEventLog(timeStr) {
+  const log = document.getElementById('event-log');
+  if (!log) return;
+  if (Math.random() > 0.55) return;
+
+  const msg = LOG_MSGS[logIdx % LOG_MSGS.length];
+  logIdx++;
+
+  const isZh = document.body.classList.contains('lang-zh');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `
+    <span class="log-time">${timeStr}</span>
+    <span class="log-${msg.status}">
+      <span class="en-text">${msg.en}</span>
+      <span class="zh-text">${msg.zh}</span>
+    </span>`;
+  log.insertBefore(entry, log.firstChild);
+
+  while (log.children.length > 12) log.removeChild(log.lastChild);
+}
+
+// ═══ Operational Advisory — demonstration only ═══
+// Every advisory below is derived from the current model state (the same
+// sensor bases the §5.1 hydraulic solver and the thermal model write). There
+// is no predictive model, no training data and no inference engine in this
+// artefact; the panel is a demonstration of the Services dimension only.
+const PSI_PER_BAR = PSI2BAR;
+
+function currentAdvisories() {
+  const out = [];
+  const b   = (id) => (sensorBases[id] ? sensorBases[id].base : NaN);
+
+  const flowGpm = b('F-M01') * M3H2GPM;            // per CDU, secondary
+  const dpPsi   = b('P-T02') * PSI_PER_BAR;        // system differential pressure
+  const retC    = b('T-R01');
+  const appC    = b('A-TP1');
+  const loadKW  = b('E-M01');
+  const coolEl  = document.getElementById('coolant_type');
+  const coolant = coolEl ? coolEl.value : 'water';
+
+  if (!pumpsOn) out.push({ icon:'⚠️', status:'warn',
+    en:'Pump redundancy lost — single-pump operation, §5.1.2 curve in use, no speed reserve',
+    zh:'泵浦冗餘喪失 — 單泵運轉，採用 §5.1.2 曲線，無轉速餘裕' });
+
+  if (isFinite(loadKW) && loadKW > 2000) out.push({ icon:'⚠️', status:'warn',
+    en:'Thermal load ' + loadKW.toFixed(0) + ' kW per CDU exceeds the §3.1 rating of 2,000 kW',
+    zh:'每台 CDU 熱負載 ' + loadKW.toFixed(0) + ' kW 超過 §3.1 額定 2,000 kW' });
+
+  if (isFinite(flowGpm) && (flowGpm < 150 || flowGpm > 650)) out.push({ icon:'⚠️', status:'warn',
+    en:'Flow ' + flowGpm.toFixed(0) + ' GPM is outside the §5.1 characterised domain 150–650 GPM',
+    zh:'流量 ' + flowGpm.toFixed(0) + ' GPM 超出 §5.1 已定義曲線範圍 150–650 GPM' });
+
+  if (isFinite(dpPsi) && (dpPsi < 80 || dpPsi > 90)) out.push({ icon:'⚠️', status:'warn',
+    en:'System differential pressure ' + dpPsi.toFixed(1) + ' psi is outside the §3.1 window 80–90 psi',
+    zh:'系統壓差 ' + dpPsi.toFixed(1) + ' psi 超出 §3.1 窗 80–90 psi' });
+
+  if (isFinite(appC) && appC > 3) out.push({ icon:'⚠️', status:'warn',
+    en:'Approach temperature ' + appC.toFixed(1) + ' °C exceeds the §5.3 target of 3 °C',
+    zh:'趨近溫度 ' + appC.toFixed(1) + ' °C 超過 §5.3 目標 3 °C' });
+  else if (isFinite(appC) && appC > 2.7) out.push({ icon:'🌡️', status:'warn',
+    en:'Approach temperature ' + appC.toFixed(1) + ' °C is approaching the §5.3 limit of 3 °C',
+    zh:'趨近溫度 ' + appC.toFixed(1) + ' °C 接近 §5.3 上限 3 °C' });
+
+  if (isFinite(retC) && retC > 55) out.push({ icon:'⚠️', status:'warn',
+    en:'Return temperature ' + retC.toFixed(1) + ' °C is above the §5 operating window 18–55 °C',
+    zh:'回水溫度 ' + retC.toFixed(1) + ' °C 超出 §5 操作窗 18–55 °C' });
+  else if (isFinite(retC) && retC > 50) out.push({ icon:'🌡️', status:'warn',
+    en:'Return temperature ' + retC.toFixed(1) + ' °C is approaching the §5 upper limit of 55 °C',
+    zh:'回水溫度 ' + retC.toFixed(1) + ' °C 接近 §5 上限 55 °C' });
+
+  if (coolant && ['water', 'glycol25'].indexOf(coolant) === -1) out.push({ icon:'⚠️', status:'warn',
+    en:'Selected coolant is not an approved §5.2 fluid — results are a non-OCP engineering scenario',
+    zh:'所選冷卻液非 §5.2 認可流體 — 結果屬非 OCP 工程情境' });
+
+  if (pumpMode !== 'dp') out.push({ icon:'ℹ️', status:'ok',
+    en:'Active pump mode is a software behavioural simulation; only fixed differential pressure is solved from the published §5.1 curves',
+    zh:'目前泵浦模式為軟體行為模擬；僅固定壓差模式由 §5.1 公開曲線求解' });
+
+  if (!out.length) out.push({ icon:'✔', status:'ok',
+    en:'All monitored conditions are inside the modelled §3.1 / §5 envelope',
+    zh:'所有監控條件皆位於模型化之 §3.1 / §5 範圍內' });
+
+  return out;
+}
+
+function updateAdvisories() {
+  const box = document.getElementById('advisory-list');
+  if (!box) return;
+  const items = currentAdvisories();
+  box.innerHTML = items.map(function (a) {
+    const col = a.status === 'warn' ? 'var(--yellow)' : 'var(--green)';
+    return '<div style="display:flex;align-items:flex-start;gap:10px;padding:8px;background:var(--mid);border-radius:3px;">' +
+      '<span style="font-size:16px;">' + a.icon + '</span>' +
+      '<div style="flex:1;">' +
+        '<div style="font-size:12px;font-weight:600;color:' + col + ';">' +
+          '<span class="en-text">' + a.en + '</span>' +
+          '<span class="zh-text">' + a.zh + '</span>' +
+        '</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:2px;" class="en-text">Derived from current model state — demonstration only, not a predictive model</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:2px;" class="zh-text">由目前模型狀態導出 — 僅供展示，非預測模型</div>' +
+      '</div></div>';
+  }).join('');
+}
+
+function startMonitor() {
+  if (monitorRunning) return;
+  monitorRunning = true;
+
+  // Load Chart.js dynamically
+  if (typeof Chart === 'undefined') {
+    const sc = document.createElement('script');
+    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js';
+    sc.onload = () => {
+      initCharts();
+      buildSensorCards();
+      captureNominal();
+      applyControlEffects();
+      updateSensors();
+      monitorTimer = setInterval(updateSensors, 2000);
+    };
+    document.head.appendChild(sc);
+  } else {
+    initCharts();
+    buildSensorCards();
+    captureNominal();
+    applyControlEffects();
+    updateSensors();
+    monitorTimer = setInterval(updateSensors, 2000);
+  }
+}
+
+function stopMonitor() {
+  if (monitorTimer) clearInterval(monitorTimer);
+  monitorRunning = false;
+}
+
+// Hook into tab switching
+const _origSwitch = window.switchTab;
+window.switchTab = function(id) {
+  _origSwitch && _origSwitch.call(this, id);
+  if (id === 'monitor') {
+    startMonitor();
+  } else {
+    // keep running in background for live badge effect
+  }
+};
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// Generate QR codes for all product boxes
+window.addEventListener('load', () => {
+  document.querySelectorAll('.qr-box').forEach(box => {
+    if (typeof QRCode !== 'undefined' && !box.hasChildNodes()) {
+      new QRCode(box, { text: box.dataset.url, width: 48, height: 48, correctLevel: QRCode.CorrectLevel.M });
+    }
+  });
+});
+</script>
+</body>
+</html>
